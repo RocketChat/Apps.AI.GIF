@@ -1,0 +1,15 @@
+{
+    "id": "5b882802-c114-49b0-80f2-38f86ae2c431",
+    "version": "0.0.1",
+    "requiredApiVersion": "^1.4.0",
+    "iconFile": "icon.png",
+    "author": {
+        "name": "Aman Negi",
+        "homepage": "https://github.com/RocketChat/Apps.AI.GIF",
+        "support": "https://github.com/RocketChat/Apps.AI.GIF/issues"
+    },
+    "name": "AI.GIF",
+    "nameSlug": "aigif",
+    "classFile": "AiGifApp.ts",
+    "description": "A RC App that assists users in generating GIF's directly from chat."
+}   
