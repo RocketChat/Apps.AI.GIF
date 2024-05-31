@@ -55,13 +55,8 @@ export class GenGifCommand implements ISlashCommand {
                 InfoMessages.NO_QUERY_FOUND
             );
         }
-
-        // Real: 
+ 
         const res = await dispatcher.generateGif(prompt);
-
-        // Mock: 
-        // const id = Date.now().toLocaleString();
-        // const res = await dispatcher.mockGenerateGif(prompt, id);
 
         if (res instanceof Error) {
             return sendMessageToSelf(

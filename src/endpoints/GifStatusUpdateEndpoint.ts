@@ -82,25 +82,7 @@ export class GifStatusUpdateEndpoint extends ApiEndpoint {
         message.setEditor(sender);
 
         await modify.getUpdater().finish(message);
-
-        // await modify.getDeleter().deleteMessage(mes, sender);
-        // const message = modify.getCreator().startMessage({
-        //     room,
-        //     sender,
-        //     text: `Prompt: ${record.prompt}`,
-        //     attachments: [
-        //         {
-        //             title: {
-        //                 value: record.prompt,
-        //             },
-        //             imageUrl: content.output,
-        //         },
-        //     ],
-        //     groupable: false,
-        // });
-
-        // await modify.getCreator().finish(message);
-
+ 
         // delete record from generation persistence
         await onGoingGenPeristence.deleteRecordById(content.id);
 
