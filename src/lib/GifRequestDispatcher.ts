@@ -112,8 +112,6 @@ export class GifRequestDispatcher {
             },
             data: requestBody,
         });
-        //TODO: Remove this
-        console.log(res);   
 
         if (!res || !res.data || res.statusCode !== 201) {
             const responseData = res.data as IGifResponseData;
@@ -128,5 +126,30 @@ export class GifRequestDispatcher {
         }
 
         return res.data as IGifResponseData;
+    }
+
+    async mockGenerateGif(
+        prompt: string,
+        id: string
+    ): Promise<IGifResponseData> {
+        const webhookUrl = await getSettingFromId(
+            this.read,
+            Preferences.WEBHOOK_URL
+        );
+
+        setTimeout(() => {
+            this.http.post(webhookUrl!, {
+                data: {
+                    id,
+                    output: "https://i.giphy.com/vzO0Vc8b2VBLi.gif",
+                },
+            });
+        }, 5000);
+
+        return {
+            id: id,
+            status: PredictionStatus.Succeeded,
+            error: "",
+        };
     }
 }

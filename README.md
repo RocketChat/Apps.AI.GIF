@@ -1,5 +1,7 @@
 # Apps.AI.GIF
 
+![img](./docs/banner_img.png)
+
 A Rocket.Chat App that allows users to generate GIFs directly within the chat interface using descriptive prompts. 
 
 > [GSOC'24 Project Link](https://summerofcode.withgoogle.com/programs/2024/projects/41d12z0y)

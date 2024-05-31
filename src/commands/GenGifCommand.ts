@@ -56,7 +56,12 @@ export class GenGifCommand implements ISlashCommand {
             );
         }
 
+        // Real: 
         const res = await dispatcher.generateGif(prompt);
+
+        // Mock: 
+        // const id = Date.now().toLocaleString();
+        // const res = await dispatcher.mockGenerateGif(prompt, id);
 
         if (res instanceof Error) {
             return sendMessageToSelf(
