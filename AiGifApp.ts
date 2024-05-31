@@ -8,6 +8,8 @@ import { App } from "@rocket.chat/apps-engine/definition/App";
 import { IAppInfo } from "@rocket.chat/apps-engine/definition/metadata";
 import { settings } from "./src/enum/Preferences";
 import { GenGifCommand } from "./src/commands/GenGifCommand";
+import { ApiSecurity, ApiVisibility } from "@rocket.chat/apps-engine/definition/api";
+import { UpdateEndpoint } from "./src/endpoints/UpdateEndpoint";
 
 export class AiGifApp extends App {
     constructor(info: IAppInfo, logger: ILogger, accessors: IAppAccessors) {
@@ -26,5 +28,11 @@ export class AiGifApp extends App {
                 configurationExtend.settings.provideSetting(setting);
             })
         );
+
+          await configurationExtend.api.provideApi({
+            visibility: ApiVisibility.PUBLIC,
+            security: ApiSecurity.UNSECURE,
+            endpoints: [new UpdateEndpoint(this)],
+        });
     }
 }
