@@ -59,30 +59,20 @@ export class GifStatusUpdateEndpoint extends ApiEndpoint {
             };
         }
 
-        const mes = await read
-            .getMessageReader()
-            .getById(record.awaitMessageId);
-
-        if (!mes) {
-            return {
-                status: 404,
-                content: {
-                    text: "Message not found",
+        const message = modify.getCreator().startMessage({
+            room,
+            sender,
+            text: "Prompt: " + record.prompt,
+            attachments: [
+                {
+                    title: { value: record.prompt },
+                    imageUrl: content.output,
                 },
-            };
-        }
-        modify.getUpdater().message(mes.id!, sender);
-        const message = await modify.getUpdater().message(mes.id!, sender);
-        message.setText("Prompt: " + record.prompt).addAttachment({
-            title: {
-                value: record.prompt,
-            },
-            imageUrl: content.output,
+            ],
         });
-        message.setEditor(sender);
 
-        await modify.getUpdater().finish(message);
- 
+        await modify.getCreator().finish(message);
+
         // delete record from generation persistence
         await onGoingGenPeristence.deleteRecordById(content.id);
 
@@ -90,6 +80,7 @@ export class GifStatusUpdateEndpoint extends ApiEndpoint {
             status: 200,
             content: {
                 message: "Gif updated",
+                ...request.content,
             },
         };
     }

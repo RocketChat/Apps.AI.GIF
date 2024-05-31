@@ -55,7 +55,7 @@ export class GenGifCommand implements ISlashCommand {
                 InfoMessages.NO_QUERY_FOUND
             );
         }
- 
+
         const res = await dispatcher.generateGif(prompt);
 
         if (res instanceof Error) {
@@ -68,9 +68,7 @@ export class GenGifCommand implements ISlashCommand {
             );
         }
 
-        //  messageId is required as we need to later update the message with the GIF
-        // sending the message to everyone in the room so that the GIF doesn't show up abruptly to users
-        const awaitMessageId = await sendMessageToRoom(
+         sendMessageToSelf(
             modify,
             context.getRoom(),
             context.getSender(),
@@ -88,9 +86,8 @@ export class GenGifCommand implements ISlashCommand {
             generationId: res.id,
             prompt,
             roomId: context.getRoom().id,
-            threadId: context.getThreadId()!,
+            threadId: context.getThreadId(),
             uid: context.getSender().id,
-            awaitMessageId,
         });
     }
 }

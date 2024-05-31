@@ -3,12 +3,11 @@ export enum PredictionStatus {
     Processing = "processing",
     Succeeded = "succeeded",
     Failed = "failed",
-    Canceled = "canceled"
+    Canceled = "canceled",
 }
 
 export interface IGifResponseData {
-    id: string  ;
-    status: PredictionStatus  ;
+    id: string;
+    status: PredictionStatus;
     error: any;
 }
-

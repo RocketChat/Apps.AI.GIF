@@ -1,13 +1,18 @@
-import { IPersistence, IPersistenceRead } from "@rocket.chat/apps-engine/definition/accessors";
-import { RocketChatAssociationModel, RocketChatAssociationRecord } from "@rocket.chat/apps-engine/definition/metadata";
+import {
+    IPersistence,
+    IPersistenceRead,
+} from "@rocket.chat/apps-engine/definition/accessors";
+import {
+    RocketChatAssociationModel,
+    RocketChatAssociationRecord,
+} from "@rocket.chat/apps-engine/definition/metadata";
 
 interface OnGoingGenRecord {
     generationId: string;
     prompt: string;
     roomId: string;
-    threadId: string;
+    threadId: string | undefined;
     uid: string;
-    awaitMessageId: string;
 }
 
 interface OnGoingGenRecordWrapper {
