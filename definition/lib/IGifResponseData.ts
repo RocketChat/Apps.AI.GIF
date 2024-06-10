@@ -1,9 +1,9 @@
 export enum PredictionStatus {
-    Starting = "starting",
-    Processing = "processing",
-    Succeeded = "succeeded",
-    Failed = "failed",
-    Canceled = "canceled",
+    STARTING = "starting",
+    PROCESSING = "processing",
+    SUCCEEDED = "succeeded",
+    FAILED = "failed",
+    CANCELLED = "canceled" // Intentional typo to match the API response
 }
 
 export interface IGifResponseData {

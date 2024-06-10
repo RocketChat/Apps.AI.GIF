@@ -117,8 +117,8 @@ export class GifRequestDispatcher {
             const responseData = res.data as IGifResponseData;
 
             if (
-                responseData.status === PredictionStatus.Failed ||
-                responseData.status === PredictionStatus.Canceled
+                responseData.status === PredictionStatus.FAILED ||
+                responseData.status === PredictionStatus.CANCELLED
             ) {
                 this.app.getLogger().log(responseData.error);
                 throw new Error(responseData.error);
@@ -148,7 +148,7 @@ export class GifRequestDispatcher {
 
         return {
             id: id,
-            status: PredictionStatus.Succeeded,
+            status: PredictionStatus.SUCCEEDED,
             error: "",
         };
     }

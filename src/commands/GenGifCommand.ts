@@ -43,7 +43,8 @@ export class GenGifCommand implements ISlashCommand {
             return;
         }
 
-        const prompt = context.getArguments().join(" ").trim();
+        // Expect the user to enter the prompt in double quotes
+        const prompt = context.getArguments()[0].trim();
 
         if (!prompt && prompt.length > 0) {
             this.app.getLogger().log("No query found");
