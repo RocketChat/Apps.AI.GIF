@@ -71,6 +71,26 @@ export class GifRequestDispatcher {
                 );
                 return false;
             }
+
+            if (
+                setting.key === Preferences.WEBHOOK_URL ||
+                setting.key === Preferences.API_URL
+            ) {
+                try {
+                    new URL(setting.value);
+                } catch (e) {
+                    const errorMessage = `Invalid URL assigned to ${setting.key}: ${setting.value}`;
+                    this.app.getLogger().log(errorMessage);
+                    sendMessageToSelf(
+                        this.modify,
+                        this.room,
+                        this.sender,
+                        this.threadId,
+                        errorMessage
+                    );
+                    return false;
+                }
+            }
         }
 
         return true;
@@ -136,6 +156,8 @@ export class GifRequestDispatcher {
             this.read,
             Preferences.WEBHOOK_URL
         );
+
+        console.log("Mocking generation of gif", webhookUrl);
 
         setTimeout(() => {
             this.http.post(webhookUrl!, {

@@ -1,0 +1,4 @@
+{
+    "GenGIFCommandExample": "gen-gif \"your-prompt-here\"",
+    "GenGIFCommandDescription": "Generate a GIF from a prompt"
+}

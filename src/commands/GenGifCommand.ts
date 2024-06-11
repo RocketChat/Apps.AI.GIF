@@ -9,16 +9,16 @@ import {
     SlashCommandContext,
 } from "@rocket.chat/apps-engine/definition/slashcommands";
 import { AiGifApp } from "../../AiGifApp";
-import { sendMessageToRoom, sendMessageToSelf } from "../utils/message";
+import { sendMessageToSelf } from "../utils/message";
 import { InfoMessages } from "../enum/InfoMessages";
 import { GifRequestDispatcher } from "../lib/GifRequestDispatcher";
 import { OnGoingGenPersistence } from "../persistence/OnGoingGenPersistence";
 
 export class GenGifCommand implements ISlashCommand {
-    command = "gen-gif";
-    i18nParamsExample = "gen-gif your-prompt-here";
-    i18nDescription = "Generate a gif based on your prompt";
-    providesPreview = false;
+    public command = "gen-gif";
+    public i18nParamsExample = "GenGIFCommandExample";
+    public i18nDescription = "GenGIFCommandDescription";
+    public providesPreview = false;
 
     constructor(private readonly app: AiGifApp) {}
 
@@ -57,7 +57,9 @@ export class GenGifCommand implements ISlashCommand {
             );
         }
 
-        const res = await dispatcher.generateGif(prompt);
+        // const res = await dispatcher.generateGif(prompt);
+        const id = Date.now().toLocaleString();
+        const res = await dispatcher.mockGenerateGif(prompt, id);
 
         if (res instanceof Error) {
             return sendMessageToSelf(
@@ -69,7 +71,7 @@ export class GenGifCommand implements ISlashCommand {
             );
         }
 
-         sendMessageToSelf(
+        sendMessageToSelf(
             modify,
             context.getRoom(),
             context.getSender(),
@@ -82,6 +84,8 @@ export class GenGifCommand implements ISlashCommand {
             persis,
             read.getPersistenceReader()
         );
+
+        console.log("ICommand user id: ", context.getSender().id);
 
         await onGoingGenPeristence.add({
             generationId: res.id,
