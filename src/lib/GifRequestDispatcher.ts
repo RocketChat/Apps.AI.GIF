@@ -157,8 +157,6 @@ export class GifRequestDispatcher {
             Preferences.WEBHOOK_URL
         );
 
-        console.log("Mocking generation of gif", webhookUrl);
-
         setTimeout(() => {
             this.http.post(webhookUrl!, {
                 data: {

@@ -85,8 +85,6 @@ export class GenGifCommand implements ISlashCommand {
             read.getPersistenceReader()
         );
 
-        console.log("ICommand user id: ", context.getSender().id);
-
         await onGoingGenPeristence.add({
             generationId: res.id,
             prompt,
