@@ -13,10 +13,11 @@ import {
 } from "@rocket.chat/apps-engine/definition/slashcommands";
 import { AiGifApp } from "../../AiGifApp";
 import { sendMessageToSelf } from "../utils/message";
-import { InfoMessages } from "../enum/InfoMessages";
+import { ErrorMessages, InfoMessages } from "../enum/InfoMessages";
 import { GifRequestDispatcher } from "../lib/GifRequestDispatcher";
 import { OnGoingGenPersistence } from "../persistence/OnGoingGenPersistence";
-import { PromptVariationItem, RedefinedPrompt } from "../lib/RedefinePrompt";
+import { PromptVariationItem } from "../lib/RedefinePrompt";
+import { RequestDebouncer } from "../helper/RequestDebouncer";
 
 export class GenGifCommand implements ISlashCommand {
     public command = "gen-gif";
@@ -24,6 +25,7 @@ export class GenGifCommand implements ISlashCommand {
     public i18nDescription = "GenGIFCommandDescription";
     public providesPreview = true;
 
+    requestDebouncer = new RequestDebouncer();
     constructor(private readonly app: AiGifApp) {}
 
     executor(
@@ -95,58 +97,6 @@ export class GenGifCommand implements ISlashCommand {
         });
     }
 
-    debounce(func: (...args: any[]) => Promise<any>, delay: number) {
-        let debounceTimer: NodeJS.Timeout | null = null;
-
-        // store to resolve the current promise as undefined, if a new request is received
-        let resolveCurrent: ((value?: any) => void) | null = null;
-
-        return function (...args: any[]) {
-            if (debounceTimer) {
-                clearTimeout(debounceTimer);
-                if (resolveCurrent) {
-                    // received a new request, resolve the current promise as undefined
-                    resolveCurrent(undefined);
-                }
-            }
-
-            return new Promise<any>((resolve, reject) => {
-                resolveCurrent = resolve;
-                debounceTimer = setTimeout(async () => {
-                    try {
-                        const result = await func(...args);
-                        resolve(result);
-                    } catch (error) {
-                        reject(error);
-                    } finally {
-                        debounceTimer = null;
-                        resolveCurrent = null;
-                    }
-                }, delay);
-            });
-        };
-    }
-
-    debouncedGetRequest: (
-        args: string,
-        http: IHttp,
-        context: SlashCommandContext
-    ) => any = this.debounce(
-        async (args: string, http: IHttp, context: SlashCommandContext) => {
-            const redefinePrompt = new RedefinedPrompt();
-
-            const data = await redefinePrompt.requestPromptVariation(
-                args,
-                http,
-                context.getSender().id,
-                this.app.getLogger()
-            );
-
-            return data;
-        },
-        2000
-    );
-
     async previewer(
         context: SlashCommandContext,
         read: IRead,
@@ -156,24 +106,44 @@ export class GenGifCommand implements ISlashCommand {
     ): Promise<ISlashCommandPreview> {
         let args = context.getArguments()[0].trim();
 
-        const res = await this.debouncedGetRequest(args, http, context);
+        try {
+            const res = await this.requestDebouncer.debouncedGetRequest(
+                args,
+                http,
+                this.app.getLogger(),
+                context
+            );
 
-        if (!res) {
+            if (!res) {
+                return {
+                    i18nTitle: "PreviewTitle_Loading",
+                    items: [],
+                };
+            }
+
+            const data = res as PromptVariationItem[];
+
             return {
-                i18nTitle: "PreviewTitle_Loading",
+                i18nTitle: "PreviewTitle_Generated",
+                items: data.map((item) => ({
+                    id: item.prompt,
+                    type: SlashCommandPreviewItemType.TEXT,
+                    value: item.prompt,
+                })),
+            };
+        } catch (err) {
+            this.app.getLogger().error("GenGifCommand.previewer", err);
+            sendMessageToSelf(
+                modify,
+                context.getRoom(),
+                context.getSender(),
+                context.getThreadId()!,
+                `${ErrorMessages.PROMPT_VARIATION_FAILED}`
+            );
+            return {
+                i18nTitle: "",
                 items: [],
             };
         }
-
-        const data = res as PromptVariationItem[];
-
-        return {
-            i18nTitle: "PreviewTitle_Generated",
-            items: data.map((item) => ({
-                id: item.prompt,
-                type: SlashCommandPreviewItemType.TEXT,
-                value: item.prompt,
-            })),
-        };
     }
 }

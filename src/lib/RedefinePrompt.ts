@@ -1,4 +1,8 @@
-import { IHttp, ILogger } from "@rocket.chat/apps-engine/definition/accessors";
+import {
+    HttpStatusCode,
+    IHttp,
+    ILogger,
+} from "@rocket.chat/apps-engine/definition/accessors";
 import { prompt } from "../enum/SystemPrompt";
 
 export interface PromptVariationItem {
@@ -8,12 +12,12 @@ export interface PromptVariationItem {
 
 export class RedefinedPrompt {
     async mockRequestPromptVariation(
-        query: string,
+        query: string
     ): Promise<PromptVariationItem[]> {
         const length = query.length + 2;
         let data: PromptVariationItem[] = [];
 
-        for (let i = 1; i <= 10; i++) {
+        for (let i = 1; i <= 4; i++) {
             data.push({ prompt: `${query} ${i}`, length: length });
         }
 
@@ -51,6 +55,10 @@ export class RedefinedPrompt {
                 headers,
                 data: payload,
             });
+
+            if (!response || response.statusCode !== HttpStatusCode.OK) {
+                throw new Error("Failed to get response from model");
+            }
 
             const data = response.data.choices[0].message.content;
             const list: PromptVariationItem[] = JSON.parse(data);
