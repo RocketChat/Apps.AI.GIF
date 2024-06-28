@@ -1,6 +1,15 @@
-import { IHttp, ILogger } from "@rocket.chat/apps-engine/definition/accessors";
+import {
+    IHttp,
+    ILogger,
+    IModify,
+    IRead,
+} from "@rocket.chat/apps-engine/definition/accessors";
 import { SlashCommandContext } from "@rocket.chat/apps-engine/definition/slashcommands";
 import { PromptVariationItem, RedefinedPrompt } from "../lib/RedefinePrompt";
+import { GifRequestDispatcher } from "../lib/GifRequestDispatcher";
+import { AiGifApp } from "../../AiGifApp";
+import { IRoom } from "@rocket.chat/apps-engine/definition/rooms";
+import { IUser } from "@rocket.chat/apps-engine/definition/users";
 
 export class RequestDebouncer {
     // generic function to debounce multiple requests to the same function, ensures that only the last request is executed
@@ -50,7 +59,7 @@ export class RequestDebouncer {
      * @returns {PromptVariationItem[]} The list of prompt variations.
      * @throws {Error} When the request or processing fails.
      */
-    debouncedGetRequest: (
+    debouncedPromptVariationRequest: (
         args: string,
         http: IHttp,
         logger: ILogger,
@@ -72,6 +81,42 @@ export class RequestDebouncer {
             );
 
             return data;
+        },
+        2000
+    );
+
+    debouncedSyncGifRequest: (
+        args: string,
+        app: AiGifApp,
+        http: IHttp,
+        read: IRead,
+        modify: IModify,
+        room: IRoom,
+        sender: IUser,
+        threadId: string | undefined
+    ) => Promise<string | undefined> = this.debounce(
+        async (
+            args: string,
+            app: AiGifApp,
+            http: IHttp,
+            read: IRead,
+            modify: IModify,
+            room: IRoom,
+            sender: IUser,
+            threadId: string | undefined
+        ) => {
+            const gifRequestDispatcher = new GifRequestDispatcher(
+                app,
+                http,
+                read,
+                modify,
+                room,
+                sender,
+                threadId
+            );
+
+            const res = await gifRequestDispatcher.syncGenerateGif(args);
+            return res;
         },
         2000
     );
