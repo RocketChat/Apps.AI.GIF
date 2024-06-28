@@ -15,6 +15,7 @@ import { IUser } from "@rocket.chat/apps-engine/definition/users";
 import { sendMessageToSelf } from "../utils/message";
 import { AiGifApp } from "../../AiGifApp";
 import { InfoMessages } from "../enum/InfoMessages";
+import { URL } from "url";
 
 export class GifRequestDispatcher {
     constructor(
@@ -148,10 +149,7 @@ export class GifRequestDispatcher {
         return res.data as IGifResponseData;
     }
 
-    async mockGenerateGif(
-        prompt: string,
-        id: string
-    ): Promise<IGifResponseData> {
+    async mockGenerateGif(id: string): Promise<IGifResponseData> {
         const webhookUrl = await getSettingFromId(
             this.read,
             Preferences.WEBHOOK_URL

@@ -6,29 +6,48 @@ import {
 } from "@rocket.chat/apps-engine/definition/accessors";
 import {
     ISlashCommand,
+    ISlashCommandPreview,
+    ISlashCommandPreviewItem,
     SlashCommandContext,
+    SlashCommandPreviewItemType,
 } from "@rocket.chat/apps-engine/definition/slashcommands";
 import { AiGifApp } from "../../AiGifApp";
 import { sendMessageToSelf } from "../utils/message";
-import { InfoMessages } from "../enum/InfoMessages";
+import { ErrorMessages, InfoMessages } from "../enum/InfoMessages";
 import { GifRequestDispatcher } from "../lib/GifRequestDispatcher";
 import { OnGoingGenPersistence } from "../persistence/OnGoingGenPersistence";
+import { PromptVariationItem } from "../lib/RedefinePrompt";
+import { RequestDebouncer } from "../helper/RequestDebouncer";
 
 export class GenGifCommand implements ISlashCommand {
     public command = "gen-gif";
     public i18nParamsExample = "GenGIFCommandExample";
     public i18nDescription = "GenGIFCommandDescription";
-    public providesPreview = false;
+    public providesPreview = true;
 
+    requestDebouncer = new RequestDebouncer();
     constructor(private readonly app: AiGifApp) {}
 
-    async executor(
+    executor(
         context: SlashCommandContext,
         read: IRead,
         modify: IModify,
         http: IHttp,
         persis: IPersistence
     ): Promise<void> {
+        throw new Error("Method not implemented.");
+    }
+
+    async executePreviewItem?(
+        item: ISlashCommandPreviewItem,
+        context: SlashCommandContext,
+        read: IRead,
+        modify: IModify,
+        http: IHttp,
+        persis: IPersistence
+    ): Promise<void> {
+        const prompt = item.value;
+
         const dispatcher = new GifRequestDispatcher(
             this.app,
             http,
@@ -43,23 +62,7 @@ export class GenGifCommand implements ISlashCommand {
             return;
         }
 
-        // Expect the user to enter the prompt in double quotes
-        const prompt = context.getArguments()[0].trim();
-
-        if (!prompt && prompt.length > 0) {
-            this.app.getLogger().log("No query found");
-            return sendMessageToSelf(
-                modify,
-                context.getRoom(),
-                context.getSender(),
-                context.getThreadId()!,
-                InfoMessages.NO_QUERY_FOUND
-            );
-        }
-
-        // const res = await dispatcher.generateGif(prompt);
-        const id = Date.now().toLocaleString();
-        const res = await dispatcher.mockGenerateGif(prompt, id);
+        const res = await dispatcher.generateGif(prompt);
 
         if (res instanceof Error) {
             return sendMessageToSelf(
@@ -92,5 +95,55 @@ export class GenGifCommand implements ISlashCommand {
             threadId: context.getThreadId(),
             uid: context.getSender().id,
         });
+    }
+
+    async previewer(
+        context: SlashCommandContext,
+        read: IRead,
+        modify: IModify,
+        http: IHttp,
+        persis: IPersistence
+    ): Promise<ISlashCommandPreview> {
+        let args = context.getArguments()[0].trim();
+
+        try {
+            const res = await this.requestDebouncer.debouncedGetRequest(
+                args,
+                http,
+                this.app.getLogger(),
+                context
+            );
+
+            if (!res) {
+                return {
+                    i18nTitle: "PreviewTitle_Loading",
+                    items: [],
+                };
+            }
+
+            const data = res as PromptVariationItem[];
+
+            return {
+                i18nTitle: "PreviewTitle_Generated",
+                items: data.map((item) => ({
+                    id: item.prompt,
+                    type: SlashCommandPreviewItemType.TEXT,
+                    value: item.prompt,
+                })),
+            };
+        } catch (err) {
+            this.app.getLogger().error("GenGifCommand.previewer", err);
+            sendMessageToSelf(
+                modify,
+                context.getRoom(),
+                context.getSender(),
+                context.getThreadId()!,
+                `${ErrorMessages.PROMPT_VARIATION_FAILED}`
+            );
+            return {
+                i18nTitle: "",
+                items: [],
+            };
+        }
     }
 }

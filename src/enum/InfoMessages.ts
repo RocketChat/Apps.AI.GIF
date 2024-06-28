@@ -7,3 +7,7 @@ export enum InfoMessages {
     GENERATION_IN_PROGRESS = "Generating the gif, please wait...",
     GENERATION_FAILED = "Failed to generate the gif, please try again later.",
 }
+
+export enum ErrorMessages {
+    PROMPT_VARIATION_FAILED = "Server Error: Failed to get prompt variations, please try again later.",
+}
