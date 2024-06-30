@@ -211,11 +211,13 @@ export class GifRequestDispatcher {
         let status: PredictionStatus = PredictionStatus.STARTING;
         let output: string | undefined;
 
-        while (
-            status !== PredictionStatus.SUCCEEDED &&
-            status !== PredictionStatus.FAILED &&
-            status !== PredictionStatus.CANCELLED
-        ) {
+        const breakCases = [
+            PredictionStatus.SUCCEEDED,
+            PredictionStatus.FAILED,
+            PredictionStatus.CANCELLED,
+        ];
+
+        while (!breakCases.includes(status)) {
             await this.waitForMillis(5000);
 
             const res = await this.http.get(genResponse.urls!.get, {
@@ -241,7 +243,7 @@ export class GifRequestDispatcher {
 
         return "https://i.giphy.com/vzO0Vc8b2VBLi.gif";
     }
-    
+
     async waitForMillis(millis: number): Promise<void> {
         await new Promise((resolve) => setTimeout(resolve, millis));
     }

@@ -4,7 +4,6 @@ import {
     IModify,
     IRead,
 } from "@rocket.chat/apps-engine/definition/accessors";
-import { SlashCommandContext } from "@rocket.chat/apps-engine/definition/slashcommands";
 import { PromptVariationItem, RedefinedPrompt } from "../lib/RedefinePrompt";
 import { GifRequestDispatcher } from "../lib/GifRequestDispatcher";
 import { AiGifApp } from "../../AiGifApp";
@@ -63,20 +62,20 @@ export class RequestDebouncer {
         args: string,
         http: IHttp,
         logger: ILogger,
-        context: SlashCommandContext
+        senderId: string
     ) => Promise<PromptVariationItem[]> = this.debounce(
         async (
             args: string,
             http: IHttp,
             logger: ILogger,
-            context: SlashCommandContext
+            senderId: string
         ) => {
             const redefinePrompt = new RedefinedPrompt();
 
             const data = await redefinePrompt.requestPromptVariation(
                 args,
                 http,
-                context.getSender().id,
+                senderId,
                 logger
             );
 
