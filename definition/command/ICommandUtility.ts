@@ -44,16 +44,7 @@ export interface IPreviewerUtilityParams {
     requestDebouncer: RequestDebouncer;
 }
 
-export interface IPreviewItemUtilityParams {
-    app: AiGifApp;
-    params: Array<string>;
+export interface IPreviewItemUtilityParams
+    extends Omit<IPreviewerUtilityParams, "requestDebouncer"> {
     item: ISlashCommandPreviewItem;
-    sender: IUser;
-    room: IRoom;
-    read: IRead;
-    modify: IModify;
-    http: IHttp;
-    persis: IPersistence;
-    triggerId?: string;
-    threadId?: string;
 }
