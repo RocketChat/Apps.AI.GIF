@@ -11,7 +11,7 @@ import {
     IRead,
 } from "@rocket.chat/apps-engine/definition/accessors";
 import { OnGoingGenPersistence } from "../persistence/OnGoingGenPersistence";
-import { IUpdateEndpointContent } from "../../definition/endpoints/IEndpointContent";
+import { IUpdateEndpointContent } from "../../definition/endpoint/IEndpointContent";
 
 export class GifStatusUpdateEndpoint extends ApiEndpoint {
     path = "gif-status-update";

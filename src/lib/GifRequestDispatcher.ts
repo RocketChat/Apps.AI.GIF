@@ -7,6 +7,7 @@ import { getSettingFromId } from "../utils/prefs";
 import { Preferences } from "../enum/Preferences";
 import { IGifRequestBody } from "../../definition/lib/IGifRequestBody";
 import {
+    IGetGifResponse,
     IGifResponseData,
     PredictionStatus,
 } from "../../definition/lib/IGifResponseData";
@@ -119,8 +120,8 @@ export class GifRequestDispatcher {
             input: {
                 mp4: false,
                 steps: 30,
-                width: 672,
-                height: 384,
+                width: 256,
+                height: 256,
                 prompt,
                 negative_prompt: "blurry",
             },
@@ -169,5 +170,81 @@ export class GifRequestDispatcher {
             status: PredictionStatus.SUCCEEDED,
             error: "",
         };
+    }
+
+    async syncGenerateGif(prompt: string): Promise<string | undefined> {
+        const apiUrl = await getSettingFromId(this.read, Preferences.API_URL);
+        const apiKey = await getSettingFromId(this.read, Preferences.API_KEY);
+        const modelId = await getSettingFromId(this.read, Preferences.MODEL_ID);
+
+        if (!apiKey || !apiUrl || !modelId) {
+            const errorMessage =
+                "ValidationError: One or more preferences are not set";
+            this.app.getLogger().log(errorMessage);
+            return undefined;
+        }
+
+        const requestBody: IGifRequestBody = {
+            version: modelId,
+            input: {
+                mp4: false,
+                steps: 30,
+                width: 256,
+                height: 256,
+                prompt,
+                negative_prompt: "blurry",
+            },
+        };
+
+        const headers = {
+            Authorization: `Bearer ${apiKey}`,
+            "Content-Type": "application/json",
+        };
+
+        const res = await this.http.post(apiUrl, {
+            headers: headers,
+            data: requestBody,
+        });
+
+        const genResponse = res.data as IGifResponseData;
+
+        let status: PredictionStatus = PredictionStatus.STARTING;
+        let output: string | undefined;
+
+        const breakCases = [
+            PredictionStatus.SUCCEEDED,
+            PredictionStatus.FAILED,
+            PredictionStatus.CANCELLED,
+        ];
+
+        while (!breakCases.includes(status)) {
+            await this.waitForMillis(5000);
+
+            const res = await this.http.get(genResponse.urls!.get, {
+                headers: headers,
+            });
+
+            const getResponse = res.data as IGetGifResponse;
+            status = getResponse.status;
+            if (getResponse.output) {
+                output = getResponse.output;
+            }
+        }
+
+        if (status === PredictionStatus.SUCCEEDED && output) {
+            return output;
+        }
+
+        return undefined;
+    }
+
+    async mockSyncGenerateGif(prompt: string): Promise<string> {
+        await this.waitForMillis(5000);
+
+        return "https://i.giphy.com/vzO0Vc8b2VBLi.gif";
+    }
+
+    async waitForMillis(millis: number): Promise<void> {
+        await new Promise((resolve) => setTimeout(resolve, millis));
     }
 }

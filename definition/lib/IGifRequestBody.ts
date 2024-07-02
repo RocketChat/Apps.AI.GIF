@@ -1,6 +1,6 @@
 export interface IGifRequestBody {
     version: string;
-    webhook: string;
+    webhook?: string;
     input: {
         mp4: boolean;
         steps: number;
