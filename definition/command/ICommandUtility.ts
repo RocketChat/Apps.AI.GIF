@@ -14,18 +14,6 @@ import {
 } from "@rocket.chat/apps-engine/definition/slashcommands";
 
 export interface ICommandUtility {
-    app: AiGifApp;
-    params: Array<string>;
-    sender: IUser;
-    room: IRoom;
-    read: IRead;
-    modify: IModify;
-    http: IHttp;
-    persis: IPersistence;
-    triggerId?: string;
-    threadId?: string;
-    requestDebouncer: RequestDebouncer;
-
     resolveCommand(): Promise<ISlashCommandPreview>;
     resolveExecutePreviewItem(item: ISlashCommandPreviewItem): Promise<void>;
 }
