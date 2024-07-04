@@ -13,11 +13,7 @@ import {
     ISlashCommandPreviewItem,
 } from "@rocket.chat/apps-engine/definition/slashcommands";
 
-export interface ICommandUtility extends IPreviewerUtilityParams {
-    resolveCommand(): Promise<ISlashCommandPreview>;
-    resolveExecutePreviewItem(item: ISlashCommandPreviewItem): Promise<void>;
-}
-export interface IPreviewerUtilityParams {
+export interface ICommandUtilityParams {
     app: AiGifApp;
     params: Array<string>;
     sender: IUser;
@@ -28,10 +24,19 @@ export interface IPreviewerUtilityParams {
     persis: IPersistence;
     triggerId?: string;
     threadId?: string;
+}
+
+export interface ICommandUtility extends ICommandUtilityParams {
+    resolveCommand(
+        requestDebouncer: RequestDebouncer
+    ): Promise<ISlashCommandPreview>;
+    resolveExecutePreviewItem(item: ISlashCommandPreviewItem): Promise<void>;
+}
+
+export interface IPreviewerUtilityParams extends ICommandUtilityParams {
     requestDebouncer: RequestDebouncer;
 }
 
-export interface IPreviewItemUtilityParams
-    extends Omit<IPreviewerUtilityParams, "requestDebouncer"> {
+export interface IPreviewItemUtilityParams extends ICommandUtilityParams {
     item: ISlashCommandPreviewItem;
 }

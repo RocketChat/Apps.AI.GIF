@@ -42,10 +42,9 @@ export class GenGifCommand implements ISlashCommand {
             persis,
             triggerId: context.getTriggerId(),
             threadId: context.getThreadId(),
-            requestDebouncer: this.requestDebouncer,
         });
 
-        return await commandUtility.resolveCommand();
+        return await commandUtility.resolveCommand(this.requestDebouncer);
     }
 
     async executePreviewItem?(
@@ -67,7 +66,6 @@ export class GenGifCommand implements ISlashCommand {
             persis,
             triggerId: context.getTriggerId(),
             threadId: context.getThreadId(),
-            requestDebouncer: this.requestDebouncer,
         });
 
         return await commandUtility.resolveExecutePreviewItem(item);

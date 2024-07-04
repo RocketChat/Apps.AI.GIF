@@ -9,7 +9,7 @@ import { IUser } from "@rocket.chat/apps-engine/definition/users";
 import { AiGifApp } from "../../AiGifApp";
 import {
     ICommandUtility,
-    IPreviewerUtilityParams,
+    ICommandUtilityParams,
 } from "../../definition/command/ICommandUtility";
 import { RequestDebouncer } from "../helper/RequestDebouncer";
 import { PreviewerHandler } from "../handlers/PreviewerHandler";
@@ -31,9 +31,8 @@ export class CommandUtility implements ICommandUtility {
     persis: IPersistence;
     triggerId?: string | undefined;
     threadId?: string | undefined;
-    requestDebouncer: RequestDebouncer;
 
-    constructor(props: IPreviewerUtilityParams) {
+    constructor(props: ICommandUtilityParams) {
         this.app = props.app;
         this.params = props.params;
         this.sender = props.sender;
@@ -44,10 +43,11 @@ export class CommandUtility implements ICommandUtility {
         this.persis = props.persis;
         this.triggerId = props.triggerId;
         this.threadId = props.threadId;
-        this.requestDebouncer = props.requestDebouncer;
     }
 
-    async resolveCommand(): Promise<ISlashCommandPreview> {
+    async resolveCommand(
+        requestDebouncer: RequestDebouncer
+    ): Promise<ISlashCommandPreview> {
         const handler = new PreviewerHandler({
             app: this.app,
             params: this.params,
@@ -59,7 +59,7 @@ export class CommandUtility implements ICommandUtility {
             persis: this.persis,
             triggerId: this.triggerId,
             threadId: this.threadId,
-            requestDebouncer: this.requestDebouncer,
+            requestDebouncer: requestDebouncer,
         });
 
         switch (this.params[0]) {
