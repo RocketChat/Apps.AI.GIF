@@ -13,11 +13,10 @@ import {
     ISlashCommandPreviewItem,
 } from "@rocket.chat/apps-engine/definition/slashcommands";
 
-export interface ICommandUtility {
+export interface ICommandUtility extends IPreviewerUtilityParams {
     resolveCommand(): Promise<ISlashCommandPreview>;
     resolveExecutePreviewItem(item: ISlashCommandPreviewItem): Promise<void>;
 }
-
 export interface IPreviewerUtilityParams {
     app: AiGifApp;
     params: Array<string>;
