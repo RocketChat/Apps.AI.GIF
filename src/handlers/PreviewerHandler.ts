@@ -13,6 +13,7 @@ import {
     ISlashCommandPreview,
     SlashCommandPreviewItemType,
 } from "@rocket.chat/apps-engine/definition/slashcommands/ISlashCommandPreview";
+import { GenerationPersistence } from "../persistence/GenerationPersistence";
 
 export class PreviewerHandler {
     app: AiGifApp;
@@ -50,6 +51,7 @@ export class PreviewerHandler {
             this.http,
             this.read,
             this.modify,
+            this.persis,
             this.room,
             this.sender,
             this.threadId
@@ -95,6 +97,25 @@ export class PreviewerHandler {
         return {
             i18nTitle: "PreviewTitle_Generated",
             items,
+        };
+    }
+
+    async executeHistory(): Promise<ISlashCommandPreview> {
+        const generationPersistence = new GenerationPersistence(
+            this.sender.id,
+            this.persis,
+            this.read.getPersistenceReader()
+        );
+
+        const gifs = await generationPersistence.getAllItems();
+
+        return {
+            i18nTitle: "PreviewTitle_Past_Creations",
+            items: gifs.map((gif) => ({
+                id: gif.query,
+                type: SlashCommandPreviewItemType.IMAGE,
+                value: gif.url,
+            })),
         };
     }
 }

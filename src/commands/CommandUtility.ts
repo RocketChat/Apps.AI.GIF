@@ -71,6 +71,10 @@ export class CommandUtility implements ICommandUtility {
             case "query": {
                 return await handler.executePromptGeneration();
             }
+            case "h":
+            case "history": {
+                return await handler.executeHistory();
+            }
             default: {
                 return {
                     i18nTitle: "PreviewTitle_Loading",

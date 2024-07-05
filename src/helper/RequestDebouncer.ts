@@ -2,6 +2,7 @@ import {
     IHttp,
     ILogger,
     IModify,
+    IPersistence,
     IRead,
 } from "@rocket.chat/apps-engine/definition/accessors";
 import { PromptVariationItem, RedefinedPrompt } from "../lib/RedefinePrompt";
@@ -9,6 +10,7 @@ import { GifRequestDispatcher } from "../lib/GifRequestDispatcher";
 import { AiGifApp } from "../../AiGifApp";
 import { IRoom } from "@rocket.chat/apps-engine/definition/rooms";
 import { IUser } from "@rocket.chat/apps-engine/definition/users";
+import { GenerationPersistence } from "../persistence/GenerationPersistence";
 
 export class RequestDebouncer {
     // generic function to debounce multiple requests to the same function, ensures that only the last request is executed
@@ -90,6 +92,7 @@ export class RequestDebouncer {
         http: IHttp,
         read: IRead,
         modify: IModify,
+        persis: IPersistence,
         room: IRoom,
         sender: IUser,
         threadId: string | undefined
@@ -100,6 +103,7 @@ export class RequestDebouncer {
             http: IHttp,
             read: IRead,
             modify: IModify,
+            persis: IPersistence,
             room: IRoom,
             sender: IUser,
             threadId: string | undefined
@@ -115,6 +119,21 @@ export class RequestDebouncer {
             );
 
             const res = await gifRequestDispatcher.syncGenerateGif(args);
+
+            if (res && res.trim().length > 0) {
+                // if response is valid, store the gif url for history feature
+                const generationPersistence = new GenerationPersistence(
+                    sender.id,
+                    persis,
+                    read.getPersistenceReader()
+                );
+
+                await generationPersistence.add({
+                    query: args,
+                    url: res!,
+                });
+            }
+
             return res;
         },
         2000

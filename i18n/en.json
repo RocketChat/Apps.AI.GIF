@@ -2,5 +2,6 @@
     "GenGIFCommandExample": "gen-gif \"your-prompt-here\"",
     "GenGIFCommandDescription": "Generate a GIF from a prompt",
     "PreviewTitle_Loading": "Loading",
-    "PreviewTitle_Generated": "Generated GIF's"
+    "PreviewTitle_Generated": "Generated GIF's",
+    "PreviewTitle_Past_Creations": "Your Creations"
 }
