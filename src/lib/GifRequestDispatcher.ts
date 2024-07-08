@@ -239,7 +239,7 @@ export class GifRequestDispatcher {
     }
 
     async mockSyncGenerateGif(prompt: string): Promise<string> {
-        await this.waitForMillis(5000);
+        await this.waitForMillis(2000);
 
         return "https://i.giphy.com/vzO0Vc8b2VBLi.gif";
     }

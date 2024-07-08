@@ -12,6 +12,7 @@ import {
 } from "@rocket.chat/apps-engine/definition/slashcommands";
 import { AiGifApp } from "../../AiGifApp";
 import { RequestDebouncer } from "../helper/RequestDebouncer";
+import { GenerationPersistence } from "../persistence/GenerationPersistence";
 import { CommandUtility } from "./CommandUtility";
 
 export class GenGifCommand implements ISlashCommand {

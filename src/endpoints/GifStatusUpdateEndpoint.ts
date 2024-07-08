@@ -12,6 +12,7 @@ import {
 } from "@rocket.chat/apps-engine/definition/accessors";
 import { OnGoingGenPersistence } from "../persistence/OnGoingGenPersistence";
 import { IUpdateEndpointContent } from "../../definition/endpoint/IEndpointContent";
+import { GenerationPersistence } from "../persistence/GenerationPersistence";
 
 export class GifStatusUpdateEndpoint extends ApiEndpoint {
     path = "gif-status-update";
@@ -75,6 +76,17 @@ export class GifStatusUpdateEndpoint extends ApiEndpoint {
 
         // delete record from generation persistence
         await onGoingGenPeristence.deleteRecordById(content.id);
+
+        const generationPersistence = new GenerationPersistence(
+            record.uid,
+            persis,
+            read.getPersistenceReader()
+        );
+
+        await generationPersistence.add({
+            query: record.prompt,
+            url: content.output,
+        });
 
         return {
             status: 200,
