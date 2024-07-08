@@ -18,15 +18,14 @@ interface GenerationRecordWrapper {
 
 export class GenerationPersistence {
     private key = "gen-gif";
+    private associations: RocketChatAssociationRecord[];
 
     constructor(
         readonly userId: string,
         readonly persistence: IPersistence,
         readonly persistenceRead: IPersistenceRead
-    ) {}
-
-    async getAll() {
-        const res = await this.persistenceRead.readByAssociations([
+    ) {
+        this.associations = [
             new RocketChatAssociationRecord(
                 RocketChatAssociationModel.MISC,
                 this.key
@@ -35,7 +34,13 @@ export class GenerationPersistence {
                 RocketChatAssociationModel.USER,
                 this.userId
             ),
-        ]);
+        ];
+    }
+
+    async getAll() {
+        const res = await this.persistenceRead.readByAssociations(
+            this.associations
+        );
         return res;
     }
 
@@ -55,38 +60,15 @@ export class GenerationPersistence {
                 {
                     generated_gifs: [record],
                 },
-                [
-                    new RocketChatAssociationRecord(
-                        RocketChatAssociationModel.MISC,
-                        this.key
-                    ),
-                    new RocketChatAssociationRecord(
-                        RocketChatAssociationModel.USER,
-                        this.userId
-                    ),
-                ]
+                this.associations
             );
         } else {
-            await this.persistence.updateByAssociations(
-                [
-                    new RocketChatAssociationRecord(
-                        RocketChatAssociationModel.MISC,
-                        this.key
-                    ),
-
-                    new RocketChatAssociationRecord(
-                        RocketChatAssociationModel.USER,
-                        this.userId
-                    ),
+            await this.persistence.updateByAssociations(this.associations, {
+                generated_gifs: [
+                    record,
+                    ...(records[0] as GenerationRecordWrapper).generated_gifs,
                 ],
-                {
-                    generated_gifs: [
-                        record,
-                        ...(records[0] as GenerationRecordWrapper)
-                            .generated_gifs,
-                    ],
-                }
-            );
+            });
         }
     }
 }
