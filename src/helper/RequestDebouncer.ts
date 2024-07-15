@@ -128,7 +128,10 @@ export class RequestDebouncer {
                     read.getPersistenceReader()
                 );
 
+                const uuid = Math.floor(Date.now() * Math.random());
+
                 await generationPersistence.add({
+                    id: uuid.toString(),
                     query: args,
                     url: res!,
                 });

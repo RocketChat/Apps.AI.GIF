@@ -73,7 +73,7 @@ export class CommandUtility implements ICommandUtility {
             }
             case "h":
             case "history": {
-                return await handler.executeHistory();
+                return await handler.executeHistory(this.params);
             }
             default: {
                 return {

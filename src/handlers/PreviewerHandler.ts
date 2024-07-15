@@ -64,11 +64,12 @@ export class PreviewerHandler {
             };
         }
 
+        const uuid = Math.floor(Date.now() * Math.random());
         return {
             i18nTitle: "PreviewTitle_Generated",
             items: [
                 {
-                    id: prompt,
+                    id: uuid + "://" + prompt,
                     type: SlashCommandPreviewItemType.IMAGE,
                     value: res,
                 },
@@ -100,19 +101,25 @@ export class PreviewerHandler {
         };
     }
 
-    async executeHistory(): Promise<ISlashCommandPreview> {
+    async executeHistory(params: string[]): Promise<ISlashCommandPreview> {
+        let page = 0;
+
+        if (params.length > 1 && !Number.isNaN(parseInt(params[1]))) {
+            page = parseInt(params[1]);
+        }
+
         const generationPersistence = new GenerationPersistence(
             this.sender.id,
             this.persis,
             this.read.getPersistenceReader()
         );
 
-        const gifs = await generationPersistence.getAllItems();
+        const gifs = await generationPersistence.getItemsForPage(page);
 
         return {
             i18nTitle: "PreviewTitle_Past_Creations",
             items: gifs.map((gif) => ({
-                id: gif.query,
+                id: gif.id + "://" + gif.query,
                 type: SlashCommandPreviewItemType.IMAGE,
                 value: gif.url,
             })),

@@ -70,6 +70,7 @@ export class GifStatusUpdateEndpoint extends ApiEndpoint {
                     imageUrl: content.output,
                 },
             ],
+            groupable: false,
         });
 
         await modify.getCreator().finish(message);
@@ -83,7 +84,10 @@ export class GifStatusUpdateEndpoint extends ApiEndpoint {
             read.getPersistenceReader()
         );
 
+        const uuid = Math.floor(Date.now() * Math.random());
+
         await generationPersistence.add({
+            id: uuid.toString(),
             query: record.prompt,
             url: content.output,
         });
