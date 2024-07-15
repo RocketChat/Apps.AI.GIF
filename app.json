@@ -12,5 +12,43 @@
     "nameSlug": "aigif",
     "classFile": "AiGifApp.ts",
     "description": "A RC App that assists users in generating GIF's directly from chat.",
-    "implements": []
+    "implements": [],
+    "permissions": [
+        {
+            "name": "ui.registerButtons"
+        },
+        {
+            "name": "api"
+        },
+        {
+            "name": "slashcommand"
+        },
+        {
+            "name": "server-setting.read"
+        },
+        {
+            "name": "room.read"
+        },
+        {
+            "name": "persistence"
+        },
+        {
+            "name": "ui.interact"
+        },
+        {
+            "name": "networking"
+        },
+        {
+            "name": "message.write"
+        },
+        {
+            "name": "user.read"
+        },
+        {
+            "name": "room.write"
+        },
+        {
+            "name": "message.read"
+        }
+    ]
 }

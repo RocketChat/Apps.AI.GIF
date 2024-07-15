@@ -11,6 +11,7 @@ import { IPreviewerUtilityParams } from "../../definition/command/ICommandUtilit
 import { RequestDebouncer } from "../helper/RequestDebouncer";
 import {
     ISlashCommandPreview,
+    ISlashCommandPreviewItem,
     SlashCommandPreviewItemType,
 } from "@rocket.chat/apps-engine/definition/slashcommands/ISlashCommandPreview";
 import { GenerationPersistence } from "../persistence/GenerationPersistence";
@@ -115,14 +116,17 @@ export class PreviewerHandler {
             this.modify,
             this.threadId
         );
+        let items: ISlashCommandPreviewItem[] = [];
 
-        const items = res.map((item) => {
-            return {
-                id: item.prompt,
-                type: SlashCommandPreviewItemType.TEXT,
-                value: item.prompt,
-            };
-        });
+        if (res) {
+            items = res.map((item) => {
+                return {
+                    id: item.prompt,
+                    type: SlashCommandPreviewItemType.TEXT,
+                    value: item.prompt,
+                };
+            });
+        }
 
         return {
             i18nTitle: "PreviewTitle_Generated",

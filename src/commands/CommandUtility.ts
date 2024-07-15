@@ -89,7 +89,6 @@ export class CommandUtility implements ICommandUtility {
     ): Promise<void> {
         const handler = new PreviewItemHandler({
             app: this.app,
-            params: this.params,
             item: item,
             sender: this.sender,
             room: this.room,

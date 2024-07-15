@@ -16,7 +16,6 @@ import { OnGoingGenPersistence } from "../persistence/OnGoingGenPersistence";
 
 export class PreviewItemHandler {
     app: AiGifApp;
-    params: string[];
     item: ISlashCommandPreviewItem;
     sender: IUser;
     room: IRoom;
@@ -29,7 +28,6 @@ export class PreviewItemHandler {
 
     constructor(props: IPreviewItemUtilityParams) {
         this.app = props.app;
-        this.params = props.params;
         this.item = props.item;
         this.sender = props.sender;
         this.room = props.room;
