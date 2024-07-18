@@ -74,8 +74,8 @@ export class GifStatusUpdateEndpoint extends ApiEndpoint {
             style: "primary",
             text: {
                 type: TextObjectType.PLAIN_TEXT,
-                text: "Approve ✅",
-                emoji: true,
+                text: "Send",
+                emoji: false,
             },
             appId: this.app.getID(),
             blockId: ButtonBlockIds.REGENERATE_OPTIONS_BLOCK,
@@ -89,8 +89,8 @@ export class GifStatusUpdateEndpoint extends ApiEndpoint {
             type: BlockElementType.BUTTON,
             text: {
                 type: TextObjectType.PLAIN_TEXT,
-                text: "Regenerate 🔄",
-                emoji: true,
+                text: "Regenerate",
+                emoji: false,
             },
             appId: this.app.getID(),
             blockId: ButtonBlockIds.REGENERATE_OPTIONS_BLOCK,
