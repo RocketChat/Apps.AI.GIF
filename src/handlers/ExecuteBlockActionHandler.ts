@@ -86,7 +86,6 @@ export class ExecuteBlockActionHandler {
             .startMessage()
             .setRoom(room)
             .setSender(user)
-            .setText(`Prompt: ${prompt}`)
             .setAttachments([
                 {
                     title: { value: prompt },

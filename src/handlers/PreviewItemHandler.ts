@@ -76,7 +76,7 @@ export class PreviewItemHandler {
         }
 
         const res = await dispatcher.generateGif(prompt);
-
+        
         if (res instanceof Error) {
             return sendMessageToSelf(
                 this.modify,
