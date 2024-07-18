@@ -15,8 +15,8 @@ export class RedefinedPrompt {
         "Content-Type": "application/json",
     };
 
-    private model = "mistral-medium";
-    private url = "https://api.mistral.ai/v1";
+    private model = "mistral";
+    private url = "http://mistral-7b/v1";
 
     async mockRequestPromptVariation(
         query: string
