@@ -11,6 +11,7 @@ import { AiGifApp } from "../../AiGifApp";
 import { IRoom } from "@rocket.chat/apps-engine/definition/rooms";
 import { IUser } from "@rocket.chat/apps-engine/definition/users";
 import { GenerationPersistence } from "../persistence/GenerationPersistence";
+import { sendMessageToSelf } from "../utils/message";
 
 export class RequestDebouncer {
     // generic function to debounce multiple requests to the same function, ensures that only the last request is executed
@@ -56,7 +57,10 @@ export class RequestDebouncer {
      * @param args - The arguments for the request.
      * @param http - The HTTP utility to make requests.
      * @param logger - Logger for logging information.
-     * @param context - The context of the slash command.
+     * @param sender - The user who sent the command.
+     * @param room - The room where the command was sent.
+     * @param modify - The modify utility to create messages.
+     * @param threadId - The thread ID where the command was sent.
      * @returns {PromptVariationItem[]} The list of prompt variations.
      * @throws {Error} When the request or processing fails.
      */
@@ -64,20 +68,46 @@ export class RequestDebouncer {
         args: string,
         http: IHttp,
         logger: ILogger,
-        senderId: string
+        sender: IUser,
+        room: IRoom,
+        modify: IModify,
+        threadId: string | undefined
     ) => Promise<PromptVariationItem[]> = this.debounce(
         async (
             args: string,
             http: IHttp,
             logger: ILogger,
-            senderId: string
+            sender: IUser,
+            room: IRoom,
+            modify: IModify,
+            threadId: string | undefined
         ) => {
             const redefinePrompt = new RedefinedPrompt();
+
+            const profanityRes = await redefinePrompt.performProfanityCheck(
+                args,
+                sender.id,
+                http,
+                logger
+            );
+
+            if (profanityRes && profanityRes.containsProfanity) {
+                sendMessageToSelf(
+                    modify,
+                    room,
+                    sender,
+                    threadId,
+                    `The text contains profanity. Please provide a different text. \nDetected Words: ${profanityRes.profaneWords.join(
+                        ", "
+                    )}`
+                );
+                return [];
+            }
 
             const data = await redefinePrompt.requestPromptVariation(
                 args,
                 http,
-                senderId,
+                sender.id,
                 logger
             );
 

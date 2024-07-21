@@ -63,7 +63,6 @@ export class GifStatusUpdateEndpoint extends ApiEndpoint {
         const message = modify.getCreator().startMessage({
             room,
             sender,
-            text: "Prompt: " + record.prompt,
             attachments: [
                 {
                     title: { value: record.prompt },

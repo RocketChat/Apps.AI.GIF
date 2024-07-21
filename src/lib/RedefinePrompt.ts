@@ -3,7 +3,7 @@ import {
     IHttp,
     ILogger,
 } from "@rocket.chat/apps-engine/definition/accessors";
-import { prompt } from "../enum/SystemPrompt";
+import { profanitySeedPrompt, variationSeedPrompt } from "../enum/SystemPrompt";
 
 export interface PromptVariationItem {
     prompt: string;
@@ -11,6 +11,13 @@ export interface PromptVariationItem {
 }
 
 export class RedefinedPrompt {
+    private headers = {
+        "Content-Type": "application/json",
+    };
+
+    private model = "mistral";
+    private url = "http://mistral-7b/v1";
+
     async mockRequestPromptVariation(
         query: string
     ): Promise<PromptVariationItem[]> {
@@ -32,27 +39,20 @@ export class RedefinedPrompt {
         senderId: string,
         logger: ILogger
     ): Promise<PromptVariationItem[]> {
-        const headers = {
-            "Content-Type": "application/json",
-        };
-
-        const model = "mistral";
-        const url = "http://mistral-7b/v1";
-
         const payload = {
             messages: [
                 {
                     role: "user",
-                    content: `${prompt}\n${query}`,
+                    content: `${variationSeedPrompt}\n${query}`,
                     user: senderId,
                 },
             ],
-            model,
+            model: this.model,
         };
 
         try {
-            const response = await http.post(url + "/chat/completions", {
-                headers,
+            const response = await http.post(this.url + "/chat/completions", {
+                headers: this.headers,
                 data: payload,
             });
 
@@ -69,4 +69,43 @@ export class RedefinedPrompt {
             return [];
         }
     }
+
+    async performProfanityCheck(
+        prompt: string,
+        senderId: string,
+        http: IHttp,
+        logger: ILogger
+    ): Promise<IProfanityCheckResponse | undefined> {
+        const payload = {
+            messages: [
+                {
+                    role: "user",
+                    content: `${profanitySeedPrompt} ${prompt}`,
+                    user: senderId,
+                },
+            ],
+            model: this.model,
+        };
+
+        try {
+            const response = await http.post(this.url + "/chat/completions", {
+                headers: this.headers,
+                data: payload,
+            });
+
+            const data = response.data.choices[0].message.content;
+            const res: IProfanityCheckResponse = JSON.parse(data);
+
+            return res;
+        } catch (e) {
+            logger.error("PromptVariationCommand.preview", e);
+            return undefined;
+        }
+    }
+}
+
+interface IProfanityCheckResponse {
+    string: string;
+    containsProfanity: boolean;
+    profaneWords: string[];
 }

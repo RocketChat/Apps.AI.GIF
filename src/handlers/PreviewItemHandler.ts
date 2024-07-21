@@ -47,7 +47,6 @@ export class PreviewItemHandler {
         const message = this.modify.getCreator().startMessage({
             room: this.room,
             sender: this.sender,
-            text: "Prompt: " + prompt,
             attachments: [
                 {
                     title: { value: prompt },

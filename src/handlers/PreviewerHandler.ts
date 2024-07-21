@@ -14,6 +14,8 @@ import {
     SlashCommandPreviewItemType,
 } from "@rocket.chat/apps-engine/definition/slashcommands/ISlashCommandPreview";
 import { GenerationPersistence } from "../persistence/GenerationPersistence";
+import { RedefinedPrompt } from "../lib/RedefinePrompt";
+import { sendMessageToSelf } from "../utils/message";
 
 export class PreviewerHandler {
     app: AiGifApp;
@@ -44,6 +46,31 @@ export class PreviewerHandler {
 
     async executeCustomPrompt(): Promise<ISlashCommandPreview> {
         const prompt = this.params[1];
+
+        const redefinePrompt = new RedefinedPrompt();
+
+        const profanityRes = await redefinePrompt.performProfanityCheck(
+            prompt,
+            this.sender.id,
+            this.http,
+            this.app.getLogger()
+        );
+
+        if (profanityRes && profanityRes.containsProfanity) {
+            sendMessageToSelf(
+                this.modify,
+                this.room,
+                this.sender,
+                this.threadId,
+                `The text contains profanity. Please provide a different text. \nDetected Words: ${profanityRes.profaneWords.join(
+                    ", "
+                )}`
+            );
+            return {
+                i18nTitle: "PreviewTitle_Profanity_Error",
+                items: [],
+            };
+        }
 
         const res = await this.requestDebouncer.debouncedSyncGifRequest(
             prompt,
@@ -83,7 +110,10 @@ export class PreviewerHandler {
             prompt,
             this.http,
             this.app.getLogger(),
-            this.sender.id
+            this.sender,
+            this.room,
+            this.modify,
+            this.threadId
         );
 
         const items = res.map((item) => {
