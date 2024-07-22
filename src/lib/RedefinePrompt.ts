@@ -60,8 +60,6 @@ export class RedefinedPrompt {
                 throw new Error("Failed to get response from model");
             }
 
-            logger.log("PromptVariationCommand.preview", response.data);
-
             const data = response.data.choices[0].message.content;
             const list: PromptVariationItem[] = JSON.parse(data);
 

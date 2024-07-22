@@ -45,24 +45,25 @@ export class ExecuteBlockActionHandler {
         } = JSON.parse(value);
 
         if (blockId === ButtonBlockIds.REGENERATE_OPTIONS_BLOCK) {
-            if (actionId === ButtonActionIds.APPROVE && value && room) {
-                await this.sendGifToRoom({
-                    modify: this.modify,
-                    room,
-                    user,
-                    prompt: args.prompt,
-                    url: args.url,
-                });
-            } else if (
-                actionId === ButtonActionIds.REGENERATE &&
-                value &&
-                room
-            ) {
-                await this.regenerateGif({
-                    room,
-                    user,
-                    prompt: args.prompt,
-                });
+            switch (actionId) {
+                case ButtonActionIds.APPROVE: {
+                    await this.sendGifToRoom({
+                        modify: this.modify,
+                        room,
+                        user,
+                        prompt: args.prompt,
+                        url: args.url,
+                    });
+                    break;
+                }
+                case ButtonActionIds.REGENERATE: {
+                    await this.regenerateGif({
+                        room,
+                        user,
+                        prompt: args.prompt,
+                    });
+                    break;
+                }
             }
         }
         return this.context.getInteractionResponder().successResponse();
