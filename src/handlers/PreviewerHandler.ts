@@ -11,11 +11,13 @@ import { IPreviewerUtilityParams } from "../../definition/command/ICommandUtilit
 import { RequestDebouncer } from "../helper/RequestDebouncer";
 import {
     ISlashCommandPreview,
+    ISlashCommandPreviewItem,
     SlashCommandPreviewItemType,
 } from "@rocket.chat/apps-engine/definition/slashcommands/ISlashCommandPreview";
 import { GenerationPersistence } from "../persistence/GenerationPersistence";
 import { RedefinedPrompt } from "../lib/RedefinePrompt";
 import { sendMessageToSelf } from "../utils/message";
+import { ErrorMessages, InfoMessages } from "../enum/InfoMessages";
 
 export class PreviewerHandler {
     app: AiGifApp;
@@ -62,9 +64,8 @@ export class PreviewerHandler {
                 this.room,
                 this.sender,
                 this.threadId,
-                `The text contains profanity. Please provide a different text. \nDetected Words: ${profanityRes.profaneWords.join(
-                    ", "
-                )}`
+                InfoMessages.PROFANITY_FOUND_MESSAGE +
+                    profanityRes.profaneWords.join(", ")
             );
             return {
                 i18nTitle: "PreviewTitle_Profanity_Error",
@@ -115,14 +116,25 @@ export class PreviewerHandler {
             this.modify,
             this.threadId
         );
+        let items: ISlashCommandPreviewItem[] = [];
 
-        const items = res.map((item) => {
-            return {
-                id: item.prompt,
-                type: SlashCommandPreviewItemType.TEXT,
-                value: item.prompt,
-            };
-        });
+        if (res) {
+            items = res.map((item) => {
+                return {
+                    id: item.prompt,
+                    type: SlashCommandPreviewItemType.TEXT,
+                    value: item.prompt,
+                };
+            });
+        } else {
+            sendMessageToSelf(
+                this.modify,
+                this.room,
+                this.sender,
+                this.threadId,
+                ErrorMessages.PROMPT_VARIATION_FAILED
+            );
+        }
 
         return {
             i18nTitle: "PreviewTitle_Generated",

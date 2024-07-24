@@ -6,6 +6,8 @@ export enum InfoMessages {
     MODEL_ID_NOT_SET = "You didn't set the Model ID, please set it to generate gifs.",
     GENERATION_IN_PROGRESS = "Generating the gif, please wait...",
     GENERATION_FAILED = "Failed to generate the gif, please try again later.",
+    PROFANITY_FOUND_MESSAGE = "The text contains profanity. Please provide a different text. \nDetected Words:",
+
 }
 
 export enum ErrorMessages {

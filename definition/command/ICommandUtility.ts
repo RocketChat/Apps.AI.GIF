@@ -37,6 +37,6 @@ export interface IPreviewerUtilityParams extends ICommandUtilityParams {
     requestDebouncer: RequestDebouncer;
 }
 
-export interface IPreviewItemUtilityParams extends ICommandUtilityParams {
+export interface IPreviewItemUtilityParams extends Omit<ICommandUtilityParams, "params"> {
     item: ISlashCommandPreviewItem;
 }

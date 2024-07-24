@@ -2,7 +2,11 @@ import {
     IAppAccessors,
     IConfigurationExtend,
     IEnvironmentRead,
+    IHttp,
     ILogger,
+    IModify,
+    IPersistence,
+    IRead,
 } from "@rocket.chat/apps-engine/definition/accessors";
 import { App } from "@rocket.chat/apps-engine/definition/App";
 import { IAppInfo } from "@rocket.chat/apps-engine/definition/metadata";
@@ -13,6 +17,11 @@ import {
     ApiVisibility,
 } from "@rocket.chat/apps-engine/definition/api";
 import { GifStatusUpdateEndpoint } from "./src/endpoints/GifStatusUpdateEndpoint";
+import {
+    IUIKitResponse,
+    UIKitBlockInteractionContext,
+} from "@rocket.chat/apps-engine/definition/uikit";
+import { ExecuteBlockActionHandler } from "./src/handlers/ExecuteBlockActionHandler";
 
 export class AiGifApp extends App {
     constructor(info: IAppInfo, logger: ILogger, accessors: IAppAccessors) {
@@ -22,7 +31,6 @@ export class AiGifApp extends App {
         configurationExtend: IConfigurationExtend,
         environmentRead: IEnvironmentRead
     ): Promise<void> {
-        
         await configurationExtend.slashCommands.provideSlashCommand(
             new GenGifCommand(this)
         );
@@ -38,5 +46,24 @@ export class AiGifApp extends App {
             security: ApiSecurity.UNSECURE,
             endpoints: [new GifStatusUpdateEndpoint(this)],
         });
+    }
+
+    public async executeBlockActionHandler(
+        context: UIKitBlockInteractionContext,
+        read: IRead,
+        http: IHttp,
+        persis: IPersistence,
+        modify: IModify
+    ): Promise<IUIKitResponse> {
+        const handler = new ExecuteBlockActionHandler(
+            this,
+            read,
+            http,
+            persis,
+            modify,
+            context
+        );
+
+        return handler.handleActions();
     }
 }
