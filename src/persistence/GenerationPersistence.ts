@@ -8,7 +8,7 @@ import {
 } from "@rocket.chat/apps-engine/definition/metadata";
 
 interface GenerationRecord {
-    id: string,
+    id: string;
     query: string;
     url: string;
 }
@@ -61,7 +61,6 @@ export class GenerationPersistence {
         const end = start + itemsPerPage;
 
         const list = records.slice(start, end);
-        console.log(page, list.length, list);
 
         return list;
     }

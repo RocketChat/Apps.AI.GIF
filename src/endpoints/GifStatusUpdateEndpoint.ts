@@ -13,6 +13,7 @@ import {
 import { OnGoingGenPersistence } from "../persistence/OnGoingGenPersistence";
 import { IUpdateEndpointContent } from "../../definition/endpoint/IEndpointContent";
 import { GenerationPersistence } from "../persistence/GenerationPersistence";
+import { uuid } from "../utils/uuid";
 
 export class GifStatusUpdateEndpoint extends ApiEndpoint {
     path = "gif-status-update";
@@ -84,10 +85,8 @@ export class GifStatusUpdateEndpoint extends ApiEndpoint {
             read.getPersistenceReader()
         );
 
-        const uuid = Math.floor(Date.now() * Math.random());
-
         await generationPersistence.add({
-            id: uuid.toString(),
+            id: uuid(),
             query: record.prompt,
             url: content.output,
         });

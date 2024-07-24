@@ -11,6 +11,7 @@ import { AiGifApp } from "../../AiGifApp";
 import { IRoom } from "@rocket.chat/apps-engine/definition/rooms";
 import { IUser } from "@rocket.chat/apps-engine/definition/users";
 import { GenerationPersistence } from "../persistence/GenerationPersistence";
+import { uuid } from "../utils/uuid";
 
 export class RequestDebouncer {
     // generic function to debounce multiple requests to the same function, ensures that only the last request is executed
@@ -128,10 +129,8 @@ export class RequestDebouncer {
                     read.getPersistenceReader()
                 );
 
-                const uuid = Math.floor(Date.now() * Math.random());
-
                 await generationPersistence.add({
-                    id: uuid.toString(),
+                    id: uuid().toString(),
                     query: args,
                     url: res!,
                 });

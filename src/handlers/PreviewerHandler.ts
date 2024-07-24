@@ -14,6 +14,7 @@ import {
     SlashCommandPreviewItemType,
 } from "@rocket.chat/apps-engine/definition/slashcommands/ISlashCommandPreview";
 import { GenerationPersistence } from "../persistence/GenerationPersistence";
+import { uuid } from "../utils/uuid";
 
 export class PreviewerHandler {
     app: AiGifApp;
@@ -64,12 +65,11 @@ export class PreviewerHandler {
             };
         }
 
-        const uuid = Math.floor(Date.now() * Math.random());
         return {
             i18nTitle: "PreviewTitle_Generated",
             items: [
                 {
-                    id: uuid + "://" + prompt,
+                    id: uuid() + "://" + prompt,
                     type: SlashCommandPreviewItemType.IMAGE,
                     value: res,
                 },
