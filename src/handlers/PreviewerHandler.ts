@@ -11,10 +11,14 @@ import { IPreviewerUtilityParams } from "../../definition/command/ICommandUtilit
 import { RequestDebouncer } from "../helper/RequestDebouncer";
 import {
     ISlashCommandPreview,
+    ISlashCommandPreviewItem,
     SlashCommandPreviewItemType,
 } from "@rocket.chat/apps-engine/definition/slashcommands/ISlashCommandPreview";
 import { GenerationPersistence } from "../persistence/GenerationPersistence";
 import { uuid } from "../utils/uuid";
+import { RedefinedPrompt } from "../lib/RedefinePrompt";
+import { sendMessageToSelf } from "../utils/message";
+import { ErrorMessages, InfoMessages } from "../enum/InfoMessages";
 
 export class PreviewerHandler {
     app: AiGifApp;
@@ -45,6 +49,30 @@ export class PreviewerHandler {
 
     async executeCustomPrompt(): Promise<ISlashCommandPreview> {
         const prompt = this.params[1];
+
+        const redefinePrompt = new RedefinedPrompt();
+
+        const profanityRes = await redefinePrompt.performProfanityCheck(
+            prompt,
+            this.sender.id,
+            this.http,
+            this.app.getLogger()
+        );
+
+        if (profanityRes && profanityRes.containsProfanity) {
+            sendMessageToSelf(
+                this.modify,
+                this.room,
+                this.sender,
+                this.threadId,
+                InfoMessages.PROFANITY_FOUND_MESSAGE +
+                    profanityRes.profaneWords.join(", ")
+            );
+            return {
+                i18nTitle: "PreviewTitle_Profanity_Error",
+                items: [],
+            };
+        }
 
         const res = await this.requestDebouncer.debouncedSyncGifRequest(
             prompt,
@@ -84,16 +112,30 @@ export class PreviewerHandler {
             prompt,
             this.http,
             this.app.getLogger(),
-            this.sender.id
+            this.sender,
+            this.room,
+            this.modify,
+            this.threadId
         );
+        let items: ISlashCommandPreviewItem[] = [];
 
-        const items = res.map((item) => {
-            return {
-                id: item.prompt,
-                type: SlashCommandPreviewItemType.TEXT,
-                value: item.prompt,
-            };
-        });
+        if (res) {
+            items = res.map((item) => {
+                return {
+                    id: item.prompt,
+                    type: SlashCommandPreviewItemType.TEXT,
+                    value: item.prompt,
+                };
+            });
+        } else {
+            sendMessageToSelf(
+                this.modify,
+                this.room,
+                this.sender,
+                this.threadId,
+                ErrorMessages.PROMPT_VARIATION_FAILED
+            );
+        }
 
         return {
             i18nTitle: "PreviewTitle_Generated",

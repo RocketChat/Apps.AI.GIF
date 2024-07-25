@@ -1,4 +1,4 @@
-export const prompt = `
+export const variationSeedPrompt = `
 You will be provided with a query, generate 4 different creative variations of the query such that they can be used to
 generate a video. The variations should be creative, engaging, and should be able to generate interest in the viewer.
 
@@ -35,3 +35,17 @@ Example query: "Cat grin"
 
 Now, process the following query and provide 4 variations in the required format:
 `;
+
+export const profanitySeedPrompt = `
+You will be provided with a text you need to identify if the text has any profane words. I need you to respond in a particular JSON format as described below. Also ensure to output no other text other than the JSON object.
+Output format: single JSON object containing keys "text", "containsProfanity" and "profaneWords".
+
+-------------------------
+{
+"text": "input-text-here",
+"containsProfanity": false/true,
+"profaneWords": []
+}
+-----------------------
+
+The text is: `;

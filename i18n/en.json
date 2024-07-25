@@ -3,5 +3,6 @@
     "GenGIFCommandDescription": "Generate a GIF from a prompt",
     "PreviewTitle_Loading": "Loading",
     "PreviewTitle_Generated": "Generated GIF's",
-    "PreviewTitle_Past_Creations": "Your Creations"
+    "PreviewTitle_Past_Creations": "Your Creations",
+    "PreviewTitle_Profanity_Error": "Your input contains profanity!"
 }
