@@ -7,7 +7,7 @@ export enum InfoMessages {
     GENERATION_IN_PROGRESS = "Generating the gif, please wait...",
     GENERATION_FAILED = "Failed to generate the gif, please try again later.",
     PROFANITY_FOUND_MESSAGE = "The text contains profanity. Please provide a different text. \nDetected Words:",
-
+    NO_ITEMS_FOUND_ON_PAGE= "No items to show on page: ",
 }
 
 export enum ErrorMessages {

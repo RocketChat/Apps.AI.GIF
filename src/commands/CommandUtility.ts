@@ -19,6 +19,8 @@ import {
     SlashCommandPreviewItemType,
 } from "@rocket.chat/apps-engine/definition/slashcommands";
 import { PreviewItemHandler } from "../handlers/PreviewItemHandler";
+import { sendMessageToSelf } from "../utils/message";
+import { InfoMessages } from "../enum/InfoMessages";
 
 export class CommandUtility implements ICommandUtility {
     app: AiGifApp;
@@ -72,8 +74,18 @@ export class CommandUtility implements ICommandUtility {
                 return await handler.executePromptGeneration();
             }
             case "h":
-            case "history": {
-                return await handler.executeHistory(this.params);
+                case "history": {
+                const preview = await handler.executeHistory(this.params);
+                if (preview.items.length <= 0) {
+                    sendMessageToSelf(
+                        this.modify,
+                        this.room,
+                        this.sender,
+                        this.threadId,
+                        InfoMessages.NO_ITEMS_FOUND_ON_PAGE + this.params[1]
+                    );
+                }
+                return preview;
             }
             default: {
                 return {

@@ -127,14 +127,6 @@ export class PreviewerHandler {
                     value: item.prompt,
                 };
             });
-        } else {
-            sendMessageToSelf(
-                this.modify,
-                this.room,
-                this.sender,
-                this.threadId,
-                ErrorMessages.PROMPT_VARIATION_FAILED
-            );
         }
 
         return {
@@ -148,6 +140,8 @@ export class PreviewerHandler {
 
         if (params.length > 1 && !Number.isNaN(parseInt(params[1]))) {
             page = parseInt(params[1]);
+
+            if (page > 0) page--;
         }
 
         const generationPersistence = new GenerationPersistence(
