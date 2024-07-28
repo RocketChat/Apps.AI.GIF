@@ -22,6 +22,7 @@ import {
 } from "@rocket.chat/ui-kit";
 import { ButtonActionIds, ButtonBlockIds } from "../enum/Identifiers";
 import { GenerationPersistence } from "../persistence/GenerationPersistence";
+import { uuid } from "../utils/uuid";
 
 export class GifStatusUpdateEndpoint extends ApiEndpoint {
     path = "gif-status-update";
@@ -119,6 +120,7 @@ export class GifStatusUpdateEndpoint extends ApiEndpoint {
             .setRoom(room)
             .setSender(sender)
             .setText(record.prompt)
+            .setGroupable(false)
             .setAttachments([
                 {
                     title: { value: record.prompt },
@@ -139,6 +141,7 @@ export class GifStatusUpdateEndpoint extends ApiEndpoint {
         );
 
         await generationPersistence.add({
+            id: uuid(),
             query: record.prompt,
             url: content.output,
         });

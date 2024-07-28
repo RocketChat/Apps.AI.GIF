@@ -40,7 +40,8 @@ export class PreviewItemHandler {
     }
 
     async sendGifToRoom(): Promise<void> {
-        const prompt = this.item.id;
+        const id = this.item.id;
+        const prompt = id.substring(id.lastIndexOf("://") + 3, id.length);
 
         const message = this.modify.getCreator().startMessage({
             room: this.room,
@@ -51,6 +52,7 @@ export class PreviewItemHandler {
                     imageUrl: this.item.value,
                 },
             ],
+            groupable: false,
         });
 
         await this.modify.getCreator().finish(message);

@@ -11,7 +11,9 @@ import { AiGifApp } from "../../AiGifApp";
 import { IRoom } from "@rocket.chat/apps-engine/definition/rooms";
 import { IUser } from "@rocket.chat/apps-engine/definition/users";
 import { GenerationPersistence } from "../persistence/GenerationPersistence";
+import { uuid } from "../utils/uuid";
 import { sendMessageToSelf } from "../utils/message";
+import { ErrorMessages } from "../enum/InfoMessages";
 
 export class RequestDebouncer {
     // generic function to debounce multiple requests to the same function, ensures that only the last request is executed
@@ -110,6 +112,16 @@ export class RequestDebouncer {
                 sender.id,
                 logger
             );
+            
+            if (!data) {
+                sendMessageToSelf(
+                    modify,
+                    room,
+                    sender,
+                    threadId,
+                    ErrorMessages.PROMPT_VARIATION_FAILED
+                );
+            }
 
             return data;
         },
@@ -159,12 +171,36 @@ export class RequestDebouncer {
                 );
 
                 await generationPersistence.add({
+                    id: uuid().toString(),
                     query: args,
                     url: res!,
                 });
             }
 
             return res;
+        },
+        2000
+    );
+
+    debouncedInvalidPageRequest: (
+        modify: IModify,
+        room: IRoom,
+        sender: IUser,
+        threadId?: string | undefined
+    ) => Promise<void> = this.debounce(
+        async (
+            modify: IModify,
+            room: IRoom,
+            sender: IUser,
+            threadId?: string | undefined
+        ) => {
+            sendMessageToSelf(
+                modify,
+                room,
+                sender,
+                threadId,
+                ErrorMessages.INVALID_PAGE_NUMBER
+            );
         },
         2000
     );

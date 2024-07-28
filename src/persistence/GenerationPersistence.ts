@@ -8,6 +8,7 @@ import {
 } from "@rocket.chat/apps-engine/definition/metadata";
 
 interface GenerationRecord {
+    id: string;
     query: string;
     url: string;
 }
@@ -50,6 +51,18 @@ export class GenerationPersistence {
             return [];
         }
         return (records[0] as GenerationRecordWrapper).generated_gifs;
+    }
+
+    async getItemsForPage(page: number) {
+        const itemsPerPage = 10;
+        const records = await this.getAllItems();
+
+        const start = page * itemsPerPage;
+        const end = start + itemsPerPage;
+
+        const list = records.slice(start, end);
+
+        return list;
     }
 
     async add(record: GenerationRecord): Promise<void> {

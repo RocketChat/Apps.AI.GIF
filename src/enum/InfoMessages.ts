@@ -7,9 +7,10 @@ export enum InfoMessages {
     GENERATION_IN_PROGRESS = "Generating the gif, please wait...",
     GENERATION_FAILED = "Failed to generate the gif, please try again later.",
     PROFANITY_FOUND_MESSAGE = "The text contains profanity. Please provide a different text. \nDetected Words:",
-
+    NO_ITEMS_FOUND_ON_PAGE = "The provided page number is out of range. The last page number is ",
 }
 
 export enum ErrorMessages {
     PROMPT_VARIATION_FAILED = "Server Error: Failed to get prompt variations, please try again later.",
+    INVALID_PAGE_NUMBER = "The provided page number is invalid, please provide a valid page number.",
 }

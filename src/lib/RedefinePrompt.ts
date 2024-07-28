@@ -102,6 +102,16 @@ export class RedefinedPrompt {
             return undefined;
         }
     }
+
+    async mockProfanityCheck(prompt: string): Promise<IProfanityCheckResponse> {
+        const res: IProfanityCheckResponse = {
+            string: prompt,
+            containsProfanity: false,
+            profaneWords: [],
+        };
+
+        return res;
+    }
 }
 
 interface IProfanityCheckResponse {

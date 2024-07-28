@@ -15,6 +15,7 @@ import {
     SlashCommandPreviewItemType,
 } from "@rocket.chat/apps-engine/definition/slashcommands/ISlashCommandPreview";
 import { GenerationPersistence } from "../persistence/GenerationPersistence";
+import { uuid } from "../utils/uuid";
 import { RedefinedPrompt } from "../lib/RedefinePrompt";
 import { sendMessageToSelf } from "../utils/message";
 import { ErrorMessages, InfoMessages } from "../enum/InfoMessages";
@@ -96,7 +97,7 @@ export class PreviewerHandler {
             i18nTitle: "PreviewTitle_Generated",
             items: [
                 {
-                    id: prompt,
+                    id: uuid() + "://" + prompt,
                     type: SlashCommandPreviewItemType.IMAGE,
                     value: res,
                 },
@@ -126,14 +127,6 @@ export class PreviewerHandler {
                     value: item.prompt,
                 };
             });
-        } else {
-            sendMessageToSelf(
-                this.modify,
-                this.room,
-                this.sender,
-                this.threadId,
-                ErrorMessages.PROMPT_VARIATION_FAILED
-            );
         }
 
         return {
@@ -142,7 +135,34 @@ export class PreviewerHandler {
         };
     }
 
-    async executeHistory(): Promise<ISlashCommandPreview> {
+    async executeHistory(params: string[]): Promise<ISlashCommandPreview> {
+        let page = 0;
+
+        if (params.length > 1 && !Number.isNaN(parseInt(params[1]))) {
+            page = parseInt(params[1]);
+
+            if (page > 0) page--;
+        }
+
+        const generationPersistence = new GenerationPersistence(
+            this.sender.id,
+            this.persis,
+            this.read.getPersistenceReader()
+        );
+
+        const gifs = await generationPersistence.getItemsForPage(page);
+
+        return {
+            i18nTitle: "PreviewTitle_Past_Creations",
+            items: gifs.map((gif) => ({
+                id: gif.id + "://" + gif.query,
+                type: SlashCommandPreviewItemType.IMAGE,
+                value: gif.url,
+            })),
+        };
+    }
+
+    async getHistoryItemCount(): Promise<number> {
         const generationPersistence = new GenerationPersistence(
             this.sender.id,
             this.persis,
@@ -151,13 +171,6 @@ export class PreviewerHandler {
 
         const gifs = await generationPersistence.getAllItems();
 
-        return {
-            i18nTitle: "PreviewTitle_Past_Creations",
-            items: gifs.map((gif) => ({
-                id: gif.query,
-                type: SlashCommandPreviewItemType.IMAGE,
-                value: gif.url,
-            })),
-        };
+        return gifs.length;
     }
 }
