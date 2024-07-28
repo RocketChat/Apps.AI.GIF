@@ -161,4 +161,16 @@ export class PreviewerHandler {
             })),
         };
     }
+
+    async getHistoryItemCount(): Promise<number> {
+        const generationPersistence = new GenerationPersistence(
+            this.sender.id,
+            this.persis,
+            this.read.getPersistenceReader()
+        );
+
+        const gifs = await generationPersistence.getAllItems();
+
+        return gifs.length;
+    }
 }

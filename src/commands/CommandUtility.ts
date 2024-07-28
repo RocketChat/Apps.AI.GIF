@@ -74,18 +74,34 @@ export class CommandUtility implements ICommandUtility {
                 return await handler.executePromptGeneration();
             }
             case "h":
-                case "history": {
-                const preview = await handler.executeHistory(this.params);
-                if (preview.items.length <= 0) {
-                    sendMessageToSelf(
+            case "history": {
+                if (
+                    Number.isNaN(parseInt(this.params[1])) &&
+                    this.params[1] !== undefined &&
+                    this.params[1].length > 0
+                ) {
+                    await requestDebouncer.debouncedInvalidPageRequest(
                         this.modify,
                         this.room,
                         this.sender,
-                        this.threadId,
-                        InfoMessages.NO_ITEMS_FOUND_ON_PAGE + this.params[1]
+                        this.threadId
                     );
+                } else {
+                    const preview = await handler.executeHistory(this.params);
+                    if (preview.items.length <= 0) {
+                        const count = await handler.getHistoryItemCount();
+                        const maxPage = Math.ceil(count / 10);
+
+                        sendMessageToSelf(
+                            this.modify,
+                            this.room,
+                            this.sender,
+                            this.threadId,
+                            InfoMessages.NO_ITEMS_FOUND_ON_PAGE + `${maxPage}.`
+                        );
+                    }
+                    return preview;
                 }
-                return preview;
             }
             default: {
                 return {

@@ -181,4 +181,27 @@ export class RequestDebouncer {
         },
         2000
     );
+
+    debouncedInvalidPageRequest: (
+        modify: IModify,
+        room: IRoom,
+        sender: IUser,
+        threadId?: string | undefined
+    ) => Promise<void> = this.debounce(
+        async (
+            modify: IModify,
+            room: IRoom,
+            sender: IUser,
+            threadId?: string | undefined
+        ) => {
+            sendMessageToSelf(
+                modify,
+                room,
+                sender,
+                threadId,
+                ErrorMessages.INVALID_PAGE_NUMBER
+            );
+        },
+        2000
+    );
 }
