@@ -134,18 +134,6 @@ export class GifStatusUpdateEndpoint extends ApiEndpoint {
         // delete record from generation persistence
         await onGoingGenPeristence.deleteRecordById(content.id);
 
-        const generationPersistence = new GenerationPersistence(
-            record.uid,
-            persis,
-            read.getPersistenceReader()
-        );
-
-        await generationPersistence.add({
-            id: uuid(),
-            query: record.prompt,
-            url: content.output,
-        });
-
         return {
             status: 200,
             content: {

@@ -49,6 +49,9 @@
         },
         {
             "name": "message.read"
+        },
+        {
+            "name": "upload.write"
         }
     ]
 }

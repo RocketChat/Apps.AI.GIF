@@ -18,7 +18,9 @@ import { GenerationPersistence } from "../persistence/GenerationPersistence";
 import { uuid } from "../utils/uuid";
 import { RedefinedPrompt } from "../lib/RedefinePrompt";
 import { sendMessageToSelf } from "../utils/message";
-import { ErrorMessages, InfoMessages } from "../enum/InfoMessages";
+import { InfoMessages } from "../enum/InfoMessages";
+import { PreviewOrigin } from "../enum/PreviewOrigin";
+import { IPreviewId } from "../../definition/handlers/IPreviewId";
 
 export class PreviewerHandler {
     app: AiGifApp;
@@ -93,11 +95,17 @@ export class PreviewerHandler {
             };
         }
 
+        const previewId: IPreviewId = {
+            id: uuid(),
+            prompt,
+            origin: PreviewOrigin.PROMPT_GENERATION,
+        };
+
         return {
             i18nTitle: "PreviewTitle_Generated",
             items: [
                 {
-                    id: uuid() + "://" + prompt,
+                    id: JSON.stringify(previewId),
                     type: SlashCommandPreviewItemType.IMAGE,
                     value: res,
                 },
@@ -128,7 +136,6 @@ export class PreviewerHandler {
                 };
             });
         }
-
         return {
             i18nTitle: "PreviewTitle_Generated",
             items,
@@ -154,11 +161,19 @@ export class PreviewerHandler {
 
         return {
             i18nTitle: "PreviewTitle_Past_Creations",
-            items: gifs.map((gif) => ({
-                id: gif.id + "://" + gif.query,
-                type: SlashCommandPreviewItemType.IMAGE,
-                value: gif.url,
-            })),
+            items: gifs.map((gif) => {
+                const previewId: IPreviewId = {
+                    id: gif.id,
+                    prompt: gif.query,
+                    origin: PreviewOrigin.HISTORY,
+                };
+
+                return {
+                    id: JSON.stringify(previewId),
+                    type: SlashCommandPreviewItemType.IMAGE,
+                    value: gif.url,
+                };
+            }),
         };
     }
 

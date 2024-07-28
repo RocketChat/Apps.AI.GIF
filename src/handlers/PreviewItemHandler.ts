@@ -10,9 +10,17 @@ import {
 import { IPreviewItemUtilityParams } from "../../definition/command/ICommandUtility";
 import { ISlashCommandPreviewItem } from "@rocket.chat/apps-engine/definition/slashcommands/ISlashCommandPreview";
 import { GifRequestDispatcher } from "../lib/GifRequestDispatcher";
-import { sendMessageToSelf } from "../utils/message";
+import {
+    sendGifToRoom,
+    sendMessageToSelf,
+    uploadGifToRoom,
+} from "../utils/message";
 import { InfoMessages } from "../enum/InfoMessages";
 import { OnGoingGenPersistence } from "../persistence/OnGoingGenPersistence";
+import { IPreviewId } from "../../definition/handlers/IPreviewId";
+import { PreviewOrigin } from "../enum/PreviewOrigin";
+import { GenerationPersistence } from "../persistence/GenerationPersistence";
+import { uuid } from "../utils/uuid";
 
 export class PreviewItemHandler {
     app: AiGifApp;
@@ -39,28 +47,7 @@ export class PreviewItemHandler {
         this.threadId = props.threadId;
     }
 
-    async sendGifToRoom(): Promise<void> {
-        const id = this.item.id;
-        const prompt = id.substring(id.lastIndexOf("://") + 3, id.length);
-
-        const message = this.modify.getCreator().startMessage({
-            room: this.room,
-            sender: this.sender,
-            attachments: [
-                {
-                    title: { value: prompt },
-                    imageUrl: this.item.value,
-                },
-            ],
-            groupable: false,
-        });
-
-        await this.modify.getCreator().finish(message);
-
-        return;
-    }
-
-    async requestGenerationFromPrompt(): Promise<void> {
+    async handleTextPreviewItem(): Promise<void> {
         const prompt = this.item.value;
 
         const dispatcher = new GifRequestDispatcher(
@@ -78,7 +65,7 @@ export class PreviewItemHandler {
         }
 
         const res = await dispatcher.generateGif(prompt);
-        
+
         if (res instanceof Error) {
             return sendMessageToSelf(
                 this.modify,
@@ -110,5 +97,47 @@ export class PreviewItemHandler {
             threadId: this.threadId,
             uid: this.sender.id,
         });
+    }
+
+    async handleImagePreviewItem(): Promise<void> {
+        const previewId: IPreviewId = JSON.parse(this.item.id);
+        const prompt = previewId.prompt;
+        const url = this.item.value;
+
+        if (previewId.origin === PreviewOrigin.HISTORY) {
+            return await sendGifToRoom(
+                url,
+                prompt,
+                this.modify,
+                this.room,
+                this.sender
+            );
+        }
+
+        // Received request from prompt generation, upload to room
+
+        const resUrl = await uploadGifToRoom(
+            url,
+            prompt,
+            this.http,
+            this.modify,
+            this.room,
+            this.sender,
+            this.app.getLogger()
+        );
+
+        if (resUrl) {
+            const generationPersistence = new GenerationPersistence(
+                this.sender.id,
+                this.persis,
+                this.read.getPersistenceReader()
+            );
+
+            await generationPersistence.add({
+                id: uuid(),
+                query: this.item.id,
+                url: resUrl,
+            });
+        }
     }
 }
