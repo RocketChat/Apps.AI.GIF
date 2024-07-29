@@ -21,11 +21,6 @@ import {
 import { PreviewItemHandler } from "../handlers/PreviewItemHandler";
 import { sendMessageToSelf } from "../utils/message";
 import { InfoMessages } from "../enum/InfoMessages";
-import { sendGifToRoom, uploadGifToRoom } from "../utils/message";
-import { IPreviewId } from "../../definition/handlers/IPreviewId";
-import { PreviewOrigin } from "../enum/PreviewOrigin";
-import { GenerationPersistence } from "../persistence/GenerationPersistence";
-import { uuid } from "../utils/uuid";
 
 export class CommandUtility implements ICommandUtility {
     app: AiGifApp;
