@@ -21,6 +21,7 @@ import {
 import { PreviewItemHandler } from "../handlers/PreviewItemHandler";
 import { sendMessageToSelf } from "../utils/message";
 import { InfoMessages } from "../enum/InfoMessages";
+import { Messages } from "../enum/Messages";
 
 export class CommandUtility implements ICommandUtility {
     app: AiGifApp;
@@ -102,6 +103,15 @@ export class CommandUtility implements ICommandUtility {
                     }
                     return preview;
                 }
+            }
+            case "help": {
+                sendMessageToSelf(
+                    this.modify,
+                    this.room,
+                    this.sender,
+                    this.threadId,
+                    Messages.HELPER_TEXT + Messages.HELPER_COMMANDS
+                );
             }
             default: {
                 return {
