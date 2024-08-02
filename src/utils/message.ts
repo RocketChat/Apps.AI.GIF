@@ -2,29 +2,31 @@ import {
     IHttp,
     ILogger,
     IModify,
+    IRead,
 } from "@rocket.chat/apps-engine/definition/accessors";
 import { IRoom } from "@rocket.chat/apps-engine/definition/rooms";
 import { IUser } from "@rocket.chat/apps-engine/definition/users";
-import { ErrorMessages } from "../enum/InfoMessages";
+import { getOrCreateDirectRoom } from "../helper/getOrCreateDirectRoom";
+import { ErrorMessages, FirstTimeInstallMessages } from "../enum/messages";
 
-export function sendMessageToSelf(
+// Utilizes a bot to notify user of any updates
+export function sendMessageVisibleToSelf(
     modify: IModify,
     room: IRoom,
-    sender: IUser,
+    user: IUser,
+    bot: IUser,
     threadId: string | undefined,
-    text: string,
-    emoji?: string
+    text: string
 ) {
     const message = modify.getCreator().startMessage({
         room,
-        sender,
+        sender: bot,
         threadId,
         text,
-        emoji,
         groupable: false,
     });
 
-    modify.getNotifier().notifyUser(sender, message.getMessage());
+    modify.getNotifier().notifyUser(user, message.getMessage());
 }
 
 export async function uploadGifToRoom(
@@ -59,10 +61,15 @@ export async function uploadGifToRoom(
         throw new Error("Failed to fetch GIF while uploading GIFf");
     } catch (e) {
         logger.error(ErrorMessages.GIF_UPLOAD_FAILED, e);
-        sendMessageToSelf(
+        const botUser: IUser = (await this.read
+            .getUserReader()
+            .getAppUser()) as IUser;
+
+        sendMessageVisibleToSelf(
             modify,
             room,
             user,
+            botUser,
             threadId,
             ErrorMessages.GIF_UPLOAD_FAILED
         );
@@ -91,4 +98,27 @@ export async function sendGifToRoom(
         ]);
 
     await modify.getCreator().finish(messageBuilder);
+}
+
+export async function sendHelperMessageOnInstall(
+    appId: string,
+    user: IUser,
+    read: IRead,
+    modify: IModify
+) {
+    const appUser = (await read.getUserReader().getAppUser()) as IUser;
+    const members = [user.username, appUser.username];
+
+    const room = await getOrCreateDirectRoom(read, modify, members);
+
+    const textMessageBuilder = modify
+        .getCreator()
+        .startMessage()
+        .setRoom(room)
+        .setSender(appUser)
+        .setGroupable(true)
+        .setParseUrls(false)
+        .setText(FirstTimeInstallMessages.WELCOME_MESSAGE);
+
+    await modify.getCreator().finish(textMessageBuilder);
 }

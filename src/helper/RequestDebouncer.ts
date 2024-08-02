@@ -10,10 +10,8 @@ import { GifRequestDispatcher } from "../lib/GifRequestDispatcher";
 import { AiGifApp } from "../../AiGifApp";
 import { IRoom } from "@rocket.chat/apps-engine/definition/rooms";
 import { IUser } from "@rocket.chat/apps-engine/definition/users";
-import { GenerationPersistence } from "../persistence/GenerationPersistence";
-import { uuid } from "../utils/uuid";
-import { sendMessageToSelf } from "../utils/message";
-import { ErrorMessages, InfoMessages } from "../enum/InfoMessages";
+import { sendMessageVisibleToSelf } from "../utils/message";
+import { ErrorMessages, InfoMessages } from "../enum/messages";
 
 export class RequestDebouncer {
     // generic function to debounce multiple requests to the same function, ensures that only the last request is executed
@@ -72,6 +70,7 @@ export class RequestDebouncer {
         logger: ILogger,
         sender: IUser,
         room: IRoom,
+        read: IRead,
         modify: IModify,
         threadId: string | undefined
     ) => Promise<PromptVariationItem[]> = this.debounce(
@@ -81,6 +80,7 @@ export class RequestDebouncer {
             logger: ILogger,
             sender: IUser,
             room: IRoom,
+            read: IRead,
             modify: IModify,
             threadId: string | undefined
         ) => {
@@ -92,12 +92,16 @@ export class RequestDebouncer {
                 http,
                 logger
             );
+            const botUser: IUser = (await read
+                .getUserReader()
+                .getAppUser()) as IUser;
 
             if (profanityRes && profanityRes.containsProfanity) {
-                sendMessageToSelf(
+                sendMessageVisibleToSelf(
                     modify,
                     room,
                     sender,
+                    botUser,
                     threadId,
                     InfoMessages.PROFANITY_FOUND_MESSAGE +
                         profanityRes.profaneWords.join(", ")
@@ -113,10 +117,11 @@ export class RequestDebouncer {
             );
 
             if (!data) {
-                sendMessageToSelf(
+                sendMessageVisibleToSelf(
                     modify,
                     room,
                     sender,
+                    botUser,
                     threadId,
                     ErrorMessages.PROMPT_VARIATION_FAILED
                 );
@@ -170,18 +175,21 @@ export class RequestDebouncer {
         modify: IModify,
         room: IRoom,
         sender: IUser,
+        botUser: IUser,
         threadId?: string | undefined
     ) => Promise<void> = this.debounce(
         async (
             modify: IModify,
             room: IRoom,
             sender: IUser,
+            botUser: IUser,
             threadId?: string | undefined
         ) => {
-            sendMessageToSelf(
+            sendMessageVisibleToSelf(
                 modify,
                 room,
                 sender,
+                botUser,
                 threadId,
                 ErrorMessages.INVALID_PAGE_NUMBER
             );

@@ -13,11 +13,11 @@ import { ButtonActionIds, ButtonBlockIds } from "../enum/Identifiers";
 import { IRoom } from "@rocket.chat/apps-engine/definition/rooms";
 import { IUser } from "@rocket.chat/apps-engine/definition/users";
 import { GifRequestDispatcher } from "../lib/GifRequestDispatcher";
-import { uploadGifToRoom, sendMessageToSelf } from "../utils/message";
-import { InfoMessages } from "../enum/InfoMessages";
+import { uploadGifToRoom, sendMessageVisibleToSelf } from "../utils/message";
 import { OnGoingGenPersistence } from "../persistence/OnGoingGenPersistence";
 import { GenerationPersistence } from "../persistence/GenerationPersistence";
 import { uuid } from "../utils/uuid";
+import { InfoMessages } from "../enum/messages";
 
 export class ExecuteBlockActionHandler {
     private context: UIKitBlockInteractionContext;
@@ -96,23 +96,28 @@ export class ExecuteBlockActionHandler {
 
         const res = await dispatcher.generateGif(prompt);
 
+        const botUser: IUser = (await this.read
+            .getUserReader()
+            .getAppUser()) as IUser;
+
         if (res instanceof Error) {
-            return sendMessageToSelf(
+            return sendMessageVisibleToSelf(
                 this.modify,
                 room,
                 user,
+                botUser,
                 undefined,
                 `${InfoMessages.GENERATION_FAILED}\n${res.message}`
             );
         }
 
-        sendMessageToSelf(
+        sendMessageVisibleToSelf(
             this.modify,
             room,
             user,
+            botUser,
             undefined,
-            `${InfoMessages.GENERATION_IN_PROGRESS}\nPrompt: ${prompt}`,
-            ":hourglass_flowing_sand:"
+            `${InfoMessages.GENERATION_IN_PROGRESS}\nPrompt: ${prompt}`
         );
 
         const onGoingGenPeristence = new OnGoingGenPersistence(
