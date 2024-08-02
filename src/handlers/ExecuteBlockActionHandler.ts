@@ -13,9 +13,11 @@ import { ButtonActionIds, ButtonBlockIds } from "../enum/Identifiers";
 import { IRoom } from "@rocket.chat/apps-engine/definition/rooms";
 import { IUser } from "@rocket.chat/apps-engine/definition/users";
 import { GifRequestDispatcher } from "../lib/GifRequestDispatcher";
-import { sendMessageToSelf } from "../utils/message";
+import { uploadGifToRoom, sendMessageToSelf } from "../utils/message";
 import { InfoMessages } from "../enum/InfoMessages";
 import { OnGoingGenPersistence } from "../persistence/OnGoingGenPersistence";
+import { GenerationPersistence } from "../persistence/GenerationPersistence";
+import { uuid } from "../utils/uuid";
 
 export class ExecuteBlockActionHandler {
     private context: UIKitBlockInteractionContext;
@@ -47,21 +49,33 @@ export class ExecuteBlockActionHandler {
         if (blockId === ButtonBlockIds.REGENERATE_OPTIONS_BLOCK) {
             switch (actionId) {
                 case ButtonActionIds.APPROVE: {
-                    await this.sendGifToRoom({
-                        modify: this.modify,
+                    const resUrl = await uploadGifToRoom(
+                        args.url,
+                        args.prompt,
+                        this.http,
+                        this.modify,
                         room,
                         user,
-                        prompt: args.prompt,
-                        url: args.url,
-                    });
+                        this.app.getLogger()
+                    );
+
+                    if (resUrl) {
+                        const generationPersistence = new GenerationPersistence(
+                            user.id,
+                            this.persis,
+                            this.read.getPersistenceReader()
+                        );
+
+                        await generationPersistence.add({
+                            id: uuid(),
+                            query: args.prompt,
+                            url: resUrl,
+                        });
+                    }
                     break;
                 }
                 case ButtonActionIds.REGENERATE: {
-                    await this.regenerateGif({
-                        room,
-                        user,
-                        prompt: args.prompt,
-                    });
+                    await this.regenerateGif(room, user, args.prompt);
                     break;
                 }
             }
@@ -69,43 +83,7 @@ export class ExecuteBlockActionHandler {
         return this.context.getInteractionResponder().successResponse();
     }
 
-    async sendGifToRoom({
-        modify,
-        room,
-        user,
-        prompt,
-        url,
-    }: {
-        modify: IModify;
-        room: IRoom;
-        user: IUser;
-        prompt: string;
-        url: string;
-    }) {
-        const messageBuilder = this.modify
-            .getCreator()
-            .startMessage()
-            .setRoom(room)
-            .setSender(user)
-            .setAttachments([
-                {
-                    title: { value: prompt },
-                    imageUrl: url,
-                },
-            ]);
-
-        await modify.getCreator().finish(messageBuilder);
-    }
-
-    async regenerateGif({
-        room,
-        user,
-        prompt,
-    }: {
-        room: IRoom;
-        user: IUser;
-        prompt: string;
-    }) {
+    async regenerateGif(room: IRoom, user: IUser, prompt: string) {
         const dispatcher = new GifRequestDispatcher(
             this.app,
             this.http,

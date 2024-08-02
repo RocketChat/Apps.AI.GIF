@@ -13,7 +13,7 @@ import { IUser } from "@rocket.chat/apps-engine/definition/users";
 import { GenerationPersistence } from "../persistence/GenerationPersistence";
 import { uuid } from "../utils/uuid";
 import { sendMessageToSelf } from "../utils/message";
-import { ErrorMessages } from "../enum/InfoMessages";
+import { ErrorMessages, InfoMessages } from "../enum/InfoMessages";
 
 export class RequestDebouncer {
     // generic function to debounce multiple requests to the same function, ensures that only the last request is executed
@@ -99,9 +99,8 @@ export class RequestDebouncer {
                     room,
                     sender,
                     threadId,
-                    `The text contains profanity. Please provide a different text. \nDetected Words: ${profanityRes.profaneWords.join(
-                        ", "
-                    )}`
+                    InfoMessages.PROFANITY_FOUND_MESSAGE +
+                        profanityRes.profaneWords.join(", ")
                 );
                 return [];
             }
@@ -112,7 +111,7 @@ export class RequestDebouncer {
                 sender.id,
                 logger
             );
-            
+
             if (!data) {
                 sendMessageToSelf(
                     modify,
@@ -161,21 +160,6 @@ export class RequestDebouncer {
             );
 
             const res = await gifRequestDispatcher.syncGenerateGif(args);
-
-            if (res && res.trim().length > 0) {
-                // if response is valid, store the gif url for history feature
-                const generationPersistence = new GenerationPersistence(
-                    sender.id,
-                    persis,
-                    read.getPersistenceReader()
-                );
-
-                await generationPersistence.add({
-                    id: uuid().toString(),
-                    query: args,
-                    url: res!,
-                });
-            }
 
             return res;
         },

@@ -140,11 +140,11 @@ export class CommandUtility implements ICommandUtility {
 
         switch (item.type) {
             case SlashCommandPreviewItemType.TEXT: {
-                await handler.requestGenerationFromPrompt();
+                await handler.handleTextPreviewItem();
                 break;
             }
             case SlashCommandPreviewItemType.IMAGE: {
-                await handler.sendGifToRoom();
+                await handler.handleImagePreviewItem();
                 break;
             }
             default: {
