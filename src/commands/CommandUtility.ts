@@ -19,9 +19,8 @@ import {
     SlashCommandPreviewItemType,
 } from "@rocket.chat/apps-engine/definition/slashcommands";
 import { PreviewItemHandler } from "../handlers/PreviewItemHandler";
-import { sendMessageToSelf } from "../utils/message";
-import { InfoMessages } from "../enum/InfoMessages";
-import { Messages } from "../enum/Messages";
+import { HelperMessages, InfoMessages } from "../enum/messages";
+import { sendMessageVisibleToSelf } from "../utils/message";
 
 export class CommandUtility implements ICommandUtility {
     app: AiGifApp;
@@ -64,6 +63,9 @@ export class CommandUtility implements ICommandUtility {
             threadId: this.threadId,
             requestDebouncer: requestDebouncer,
         });
+        const botUser: IUser = (await this.read
+            .getUserReader()
+            .getAppUser()) as IUser;
 
         switch (this.params[0]) {
             case "p":
@@ -74,8 +76,8 @@ export class CommandUtility implements ICommandUtility {
             case "query": {
                 return await handler.executePromptGeneration();
             }
-            case "h":
             case "history": {
+                // Handle the case of user entering a non-integer page number
                 if (
                     Number.isNaN(parseInt(this.params[1])) &&
                     this.params[1] !== undefined &&
@@ -85,41 +87,58 @@ export class CommandUtility implements ICommandUtility {
                         this.modify,
                         this.room,
                         this.sender,
+                        botUser,
                         this.threadId
                     );
+                    break;
                 } else {
                     const preview = await handler.executeHistory(this.params);
+
                     if (preview.items.length <= 0) {
                         const count = await handler.getHistoryItemCount();
+
+                        // No items present in the history
+                        if (count == 0) {
+                            sendMessageVisibleToSelf(
+                                this.modify,
+                                this.room,
+                                this.sender,
+                                botUser,
+                                this.threadId,
+                                InfoMessages.NO_ITEMS_FOUND
+                            );
+                            break;
+                        }
+
                         const maxPage = Math.ceil(count / 10);
 
-                        sendMessageToSelf(
+                        sendMessageVisibleToSelf(
                             this.modify,
                             this.room,
                             this.sender,
+                            botUser,
                             this.threadId,
-                            InfoMessages.NO_ITEMS_FOUND_ON_PAGE + `${maxPage}.`
+                            InfoMessages.PAGE_OUT_OF_BOUNDS + `${maxPage}.`
                         );
                     }
                     return preview;
                 }
             }
             case "help": {
-                sendMessageToSelf(
+                sendMessageVisibleToSelf(
                     this.modify,
                     this.room,
                     this.sender,
+                    botUser,
                     this.threadId,
-                    Messages.HELPER_TEXT + Messages.HELPER_COMMANDS
+                    HelperMessages.HELPER_TEXT + HelperMessages.HELPER_COMMANDS
                 );
             }
-            default: {
-                return {
-                    i18nTitle: "PreviewTitle_Loading",
-                    items: [],
-                };
-            }
         }
+        return {
+            i18nTitle: "PreviewTitle_Loading",
+            items: [],
+        };
     }
 
     async resolveExecutePreviewItem(

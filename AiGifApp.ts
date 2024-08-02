@@ -1,5 +1,6 @@
 import {
     IAppAccessors,
+    IAppInstallationContext,
     IConfigurationExtend,
     IEnvironmentRead,
     IHttp,
@@ -22,6 +23,7 @@ import {
     UIKitBlockInteractionContext,
 } from "@rocket.chat/apps-engine/definition/uikit";
 import { ExecuteBlockActionHandler } from "./src/handlers/ExecuteBlockActionHandler";
+import { sendHelperMessageOnInstall } from "./src/utils/message";
 
 export class AiGifApp extends App {
     constructor(info: IAppInfo, logger: ILogger, accessors: IAppAccessors) {
@@ -65,5 +67,17 @@ export class AiGifApp extends App {
         );
 
         return handler.handleActions();
+    }
+
+    public async onInstall(
+        context: IAppInstallationContext,
+        read: IRead,
+        http: IHttp,
+        persistence: IPersistence,
+        modify: IModify
+    ): Promise<void> {
+        const { user } = context;
+        await sendHelperMessageOnInstall(this.getID(), user, read, modify);
+        return;
     }
 }

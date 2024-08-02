@@ -70,6 +70,21 @@ export class RedefinedPrompt {
         }
     }
 
+    async mockProfanityCheck(
+        prompt: string,
+        senderId: string,
+        http: IHttp,
+        logger: ILogger
+    ): Promise<IProfanityCheckResponse> {
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+
+        return {
+            string: prompt,
+            containsProfanity: false,
+            profaneWords: [],
+        };
+    }
+
     async performProfanityCheck(
         prompt: string,
         senderId: string,
@@ -101,16 +116,6 @@ export class RedefinedPrompt {
             logger.error("PromptVariationCommand.preview", e);
             return undefined;
         }
-    }
-
-    async mockProfanityCheck(prompt: string): Promise<IProfanityCheckResponse> {
-        const res: IProfanityCheckResponse = {
-            string: prompt,
-            containsProfanity: false,
-            profaneWords: [],
-        };
-
-        return res;
     }
 }
 

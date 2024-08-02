@@ -13,9 +13,9 @@ import {
 } from "../../definition/lib/IGifResponseData";
 import { IRoom } from "@rocket.chat/apps-engine/definition/rooms";
 import { IUser } from "@rocket.chat/apps-engine/definition/users";
-import { sendMessageToSelf } from "../utils/message";
+import { sendMessageVisibleToSelf } from "../utils/message";
 import { AiGifApp } from "../../AiGifApp";
-import { InfoMessages } from "../enum/InfoMessages";
+import { InfoMessages } from "../enum/messages";
 import { URL } from "url";
 
 export class GifRequestDispatcher {
@@ -61,13 +61,15 @@ export class GifRequestDispatcher {
             },
         ];
 
+        const botUser = (await this.read.getUserReader().getAppUser()) as IUser;
         for (const setting of settings) {
             if (!setting.value || setting.value === "") {
                 this.app.getLogger().log(setting.message);
-                sendMessageToSelf(
+                sendMessageVisibleToSelf(
                     this.modify,
                     this.room,
                     this.sender,
+                    botUser,
                     this.threadId,
                     setting.message
                 );
@@ -83,10 +85,11 @@ export class GifRequestDispatcher {
                 } catch (e) {
                     const errorMessage = `Invalid URL assigned to ${setting.key}: ${setting.value}`;
                     this.app.getLogger().log(errorMessage);
-                    sendMessageToSelf(
+                    sendMessageVisibleToSelf(
                         this.modify,
                         this.room,
                         this.sender,
+                        botUser,
                         this.threadId,
                         errorMessage
                     );

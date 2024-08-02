@@ -17,10 +17,10 @@ import {
 import { GenerationPersistence } from "../persistence/GenerationPersistence";
 import { uuid } from "../utils/uuid";
 import { RedefinedPrompt } from "../lib/RedefinePrompt";
-import { sendMessageToSelf } from "../utils/message";
-import { InfoMessages } from "../enum/InfoMessages";
 import { PreviewOrigin } from "../enum/PreviewOrigin";
 import { IPreviewId } from "../../definition/handlers/IPreviewId";
+import { sendMessageVisibleToSelf } from "../utils/message";
+import { InfoMessages } from "../enum/messages";
 
 export class PreviewerHandler {
     app: AiGifApp;
@@ -61,11 +61,16 @@ export class PreviewerHandler {
             this.app.getLogger()
         );
 
+        const botUser: IUser = (await this.read
+            .getUserReader()
+            .getAppUser()) as IUser;
+
         if (profanityRes && profanityRes.containsProfanity) {
-            sendMessageToSelf(
+            sendMessageVisibleToSelf(
                 this.modify,
                 this.room,
                 this.sender,
+                botUser,
                 this.threadId,
                 InfoMessages.PROFANITY_FOUND_MESSAGE +
                     profanityRes.profaneWords.join(", ")
@@ -122,6 +127,7 @@ export class PreviewerHandler {
             this.app.getLogger(),
             this.sender,
             this.room,
+            this.read,
             this.modify,
             this.threadId
         );

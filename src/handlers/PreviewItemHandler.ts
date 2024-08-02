@@ -12,10 +12,10 @@ import { ISlashCommandPreviewItem } from "@rocket.chat/apps-engine/definition/sl
 import { GifRequestDispatcher } from "../lib/GifRequestDispatcher";
 import {
     sendGifToRoom,
-    sendMessageToSelf,
+    sendMessageVisibleToSelf,
     uploadGifToRoom,
 } from "../utils/message";
-import { InfoMessages } from "../enum/InfoMessages";
+import { InfoMessages } from "../enum/messages";
 import { OnGoingGenPersistence } from "../persistence/OnGoingGenPersistence";
 import { IPreviewId } from "../../definition/handlers/IPreviewId";
 import { PreviewOrigin } from "../enum/PreviewOrigin";
@@ -66,23 +66,27 @@ export class PreviewItemHandler {
 
         const res = await dispatcher.generateGif(prompt);
 
+        const botUser: IUser = (await this.read
+            .getUserReader()
+            .getAppUser()) as IUser;
+
         if (res instanceof Error) {
-            return sendMessageToSelf(
+            return sendMessageVisibleToSelf(
                 this.modify,
                 this.room,
                 this.sender,
+                botUser,
                 this.threadId,
                 `${InfoMessages.GENERATION_FAILED}\n${res.message}`
             );
         }
-
-        sendMessageToSelf(
+        sendMessageVisibleToSelf(
             this.modify,
             this.room,
             this.sender,
+            botUser,
             this.threadId,
-            `${InfoMessages.GENERATION_IN_PROGRESS}\nPrompt: ${prompt}`,
-            ":hourglass_flowing_sand:"
+            `${InfoMessages.GENERATION_IN_PROGRESS}\nPrompt: ${prompt}`
         );
 
         const onGoingGenPeristence = new OnGoingGenPersistence(
