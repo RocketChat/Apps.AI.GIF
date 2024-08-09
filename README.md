@@ -1,4 +1,4 @@
-![gif-gen-banner](./docs/gif-gen-banner.png)
+![gif-gen-banner](https://github.com/user-attachments/assets/b5773be9-a85c-4985-ba00-54e4dbeb545a)
 
 <div align="center">
     <p>A Rocket.Chat App that allows users to generate GIFs directly within the chat interface using descriptive prompts.</p>
@@ -53,8 +53,7 @@ Firstly, ensure you have a Rocket.Chat Server running either locally or you have
 
 ## Architecture
 
-![architecture](./docs/architecture.png)
-
+ ![architecture](https://github.com/user-attachments/assets/bcba7029-0fb3-44c6-b612-86050f116bad)
 
 ## Documentation
 Here are some links to examples and documentation:
