@@ -36,15 +36,19 @@ Firstly, ensure you have a Rocket.Chat Server running either locally or you have
     ```cmd
     git clone https://github.com/<yourusername>/apps.ai.gif
     ```
-2. Install all dependencies:
+2. Navigate to the project directory:
+    ```cmd
+    cd Apps.AI.GIF
+    ```    
+3. Install all dependencies:
    ```cmd
    npm i
    ```
-3. Deploy the app to your server:
+4. Deploy the app to your server:
    ```cmd
    rc-apps deploy --url <url> --username <username> --password <password>
    ```
-4. Once deployed, we need to set the prefences to use all the features. Go to installed apps -> private apps and under settings provide the following settings:
+5. Once deployed, we need to set the prefences to use all the features. Go to installed apps -> private apps and under settings provide the following settings:
    
    > a. apiKey: Replicate API Key, generate one from [here](https://replicate.com/).
    
